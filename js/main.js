@@ -14,6 +14,7 @@ var camera, controls, scene, renderer;
 
 var mesh, mat;
 
+// in blocks
 var worldWidth = 200, worldDepth = 200,
 worldHalfWidth = worldWidth / 2, worldHalfDepth = worldDepth / 2,
 data = generateHeight( worldWidth, worldDepth );
@@ -27,12 +28,12 @@ function init() {
 
     container = document.getElementById( 'container' );
 
-    camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 1, 20000 );
-    camera.position.y = getY( worldHalfWidth, worldHalfDepth ) * 100 + 100;
+    camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.01, 200 );
+    camera.position.y = getY( worldHalfWidth, worldHalfDepth ) * 1 + 1;
 
     controls = new THREE.FirstPersonControls( camera );
 
-    controls.movementSpeed = 1000;
+    controls.movementSpeed = 10;
     controls.lookSpeed = 0.125;
     controls.lookVertical = true;
     controls.constrainVertical = true;
@@ -49,34 +50,34 @@ function init() {
 
     var matrix = new THREE.Matrix4();
 
-    var pxGeometry = new THREE.PlaneGeometry( 100, 100 );
+    var pxGeometry = new THREE.PlaneGeometry( 1, 1 );
     pxGeometry.faces[ 0 ].materialIndex = 1;
     pxGeometry.faces[ 0 ].vertexColors = [ light, shadow, shadow, light ];
     pxGeometry.applyMatrix( matrix.makeRotationY( Math.PI / 2 ) );
-    pxGeometry.applyMatrix( matrix.makeTranslation( 50, 0, 0 ) );
+    pxGeometry.applyMatrix( matrix.makeTranslation( 0.5, 0, 0 ) );
 
-    var nxGeometry = new THREE.PlaneGeometry( 100, 100 );
+    var nxGeometry = new THREE.PlaneGeometry( 1, 1 );
     nxGeometry.faces[ 0 ].materialIndex = 1;
     nxGeometry.faces[ 0 ].vertexColors = [ light, shadow, shadow, light ];
     nxGeometry.applyMatrix( matrix.makeRotationY( - Math.PI / 2 ) );
-    nxGeometry.applyMatrix( matrix.makeTranslation( - 50, 0, 0 ) );
+    nxGeometry.applyMatrix( matrix.makeTranslation( - 0.5, 0, 0 ) );
 
-    var pyGeometry = new THREE.PlaneGeometry( 100, 100 );
+    var pyGeometry = new THREE.PlaneGeometry( 1, 1 );
     pyGeometry.faces[ 0 ].materialIndex = 0;
     pyGeometry.faces[ 0 ].vertexColors = [ light, light, light, light ];
     pyGeometry.applyMatrix( matrix.makeRotationX( - Math.PI / 2 ) );
-    pyGeometry.applyMatrix( matrix.makeTranslation( 0, 50, 0 ) );
+    pyGeometry.applyMatrix( matrix.makeTranslation( 0, 0.5, 0 ) );
 
-    var pzGeometry = new THREE.PlaneGeometry( 100, 100 );
+    var pzGeometry = new THREE.PlaneGeometry( 1, 1 );
     pzGeometry.faces[ 0 ].materialIndex = 1;
     pzGeometry.faces[ 0 ].vertexColors = [ light, shadow, shadow, light ];
-    pzGeometry.applyMatrix( matrix.makeTranslation( 0, 0, 50 ) );
+    pzGeometry.applyMatrix( matrix.makeTranslation( 0, 0, 0.5 ) );
 
-    var nzGeometry = new THREE.PlaneGeometry( 100, 100 );
+    var nzGeometry = new THREE.PlaneGeometry( 1, 1 );
     nzGeometry.faces[ 0 ].materialIndex = 1;
     nzGeometry.faces[ 0 ].vertexColors = [ light, shadow, shadow, light ];
     nzGeometry.applyMatrix( matrix.makeRotationY( Math.PI ) );
-    nzGeometry.applyMatrix( matrix.makeTranslation( 0, 0, -50 ) );
+    nzGeometry.applyMatrix( matrix.makeTranslation( 0, 0, -0.5 ) );
 
     //
 
@@ -86,12 +87,12 @@ function init() {
     for ( var z = 0; z < worldDepth; z ++ ) {
 
         for ( var x = 0; x < worldWidth; x ++ ) {
-
             var h = getY( x, z );
+            //console.log(x, z, h);
 
-            dummy.position.x = x * 100 - worldHalfWidth * 100;
-            dummy.position.y = h * 100;
-            dummy.position.z = z * 100 - worldHalfDepth * 100;
+            dummy.position.x = x * 1 - worldHalfWidth * 1;
+            dummy.position.y = h * 1;
+            dummy.position.z = z * 1 - worldHalfDepth * 1;
 
             var px = getY( x + 1, z );
             var nx = getY( x - 1, z );
@@ -229,7 +230,7 @@ function loadTexture( path, callback ) {
 function generateHeight( width, height ) {
 
     var data = [], perlin = new ImprovedNoise(),
-    size = width * height, quality = 2, z = Math.random() * 100;
+    size = width * height, quality = 2, z = Math.random() * 1;
 
     for ( var j = 0; j < 4; j ++ ) {
 
@@ -258,9 +259,22 @@ function getY( x, z ) {
 
 //
 
+function gravity() {
+    var pos = camera.position;
+    var floor = getY(~~ (pos.x/1), ~~(pos.z/1));
+    //console.log(floor, ~~pos.x, ~~pos.z, pos.y);
+    if (pos.y > floor) {
+        pos.y -= 5;
+    } else {
+        pos.y = floor;
+    }
+}
+
 function animate() {
 
     requestAnimationFrame( animate );
+
+    //gravity();
 
     render();
     stats.update();
