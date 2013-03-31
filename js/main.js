@@ -15,21 +15,26 @@ var camera, controls, scene, renderer;
 var mesh, mat;
 
 // in blocks
-var worldWidth = 200, worldDepth = 200,
-worldHalfWidth = worldWidth / 2, worldHalfDepth = worldDepth / 2,
-data = generateHeight( worldWidth, worldDepth );
+var worldWidth = 200, worldDepth = 200;
+var worldHalfWidth = worldWidth / 2;
+var worldHalfDepth = worldDepth / 2;
+var hdata = generateHeight( worldWidth, worldDepth );
+
+var blockType = {
+    grass: 0,
+    earth: 1
+}
 
 var clock = new THREE.Clock();
-
-init();
-animate();
 
 function init() {
 
     container = document.getElementById( 'container' );
 
     camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.01, 200 );
-    camera.position.y = getY( worldHalfWidth, worldHalfDepth ) * 1 + 1;
+    camera.position.y = getY( worldHalfWidth, worldHalfDepth ) * 1 + 20;
+    camera.position.x = worldHalfWidth;
+    camera.position.z = worldHalfDepth;
 
     controls = new THREE.FirstPersonControls( camera );
 
@@ -83,6 +88,7 @@ function init() {
 
     var geometry = new THREE.Geometry();
     var dummy = new THREE.Mesh();
+    world = {};
 
     for ( var z = 0; z < worldDepth; z ++ ) {
 
@@ -90,9 +96,10 @@ function init() {
             var h = getY( x, z );
             //console.log(x, z, h);
 
-            dummy.position.x = x * 1 - worldHalfWidth * 1;
-            dummy.position.y = h * 1;
-            dummy.position.z = z * 1 - worldHalfDepth * 1;
+            world[[x, h, z]] = blockType.grass;
+            dummy.position.x = x;
+            dummy.position.y = h;
+            dummy.position.z = z;
 
             var px = getY( x + 1, z );
             var nx = getY( x - 1, z );
@@ -253,39 +260,96 @@ function generateHeight( width, height ) {
 
 function getY( x, z ) {
 
-    return ( data[ x + z * worldWidth ] * 0.2 ) | 0;
+    return ( hdata[ x + z * worldWidth ] * 0.2 ) | 0;
 
 }
 
 //
-
-function gravity() {
+var pad = 0.25;
+var vy = 0;
+function gravity(dt) {
     var pos = camera.position;
-    var floor = getY(~~ (pos.x/1), ~~(pos.z/1));
-    //console.log(floor, ~~pos.x, ~~pos.z, pos.y);
-    if (pos.y > floor) {
-        pos.y -= 5;
-    } else {
-        pos.y = floor;
+    vy = vy - 0.1 * dt
+    vy = Math.max(vy, -3); // terminal velocity
+    //vy = 0.1 * dt;
+    
+    // collide
+    // test for the 3x3x4 adjacent cubes
+    // though we could optimize and ignore the core 1x1x2
+    var ix = ~~pos.x;
+    var iy = Math.floor(pos.y);
+    var iz = ~~pos.z;
+    if (world[[ix, iy - 2, iz]] !== undefined) {
+        //console.log([ix, iy - 2, iz]);
+        //console.log(pos)
+        pos.y = Math.max(pos.y, iy + pad);
+        //console.log(pos)
+        vy = 0;
     }
+    
+    /*[1, 0], [-1, 0], [0, 1], [0, -1]
+    
+    if (world[[ix, iy, iz]] !== undefined) {
+        //console.log([ix, iy - 2, iz]);
+        //console.log(pos)
+        pos.y = Math.max(pos.y, iy + pad);
+        //console.log(pos)
+        vy = 0;
+    }*/
+    
+    /*for (var x = -1; x <= 1; x++) {
+        for (var y = -2; y <= 1; y++) {
+            for (var z = -1; z <= 1; z++) {
+                var cube = [ix + x, iy + y, iz + z];
+                if (world[cube] === undefined) {
+                    continue;
+                }
+                // this cube is in our world
+                //console.log(pos.x, pos.y, pos.z);
+                //console.log(cube);
+                //console.log(world[cube]);
+                if (Math.abs(pos.y - cube[1]) <= pad) {
+                    //console.log(pos.x, pos.y, pos.z);
+                    vy = 0;
+                    if (pos.y > cube[1]) {
+                        pos.y = cube[1] + pad;
+                    } else {
+                        pos.y = cube[1] - pad;
+                    }
+                    //console.log(pos.x, pos.y, pos.z);
+                }
+            }
+        }
+    }*/
+    
+    //console.log(floor, ~~pos.x, ~~pos.z, pos.y);
+    //if (world[floor] === undefined) {
+    //} else {
+    //    pos.y = floor[1] + 2;
+    //}
+    pos.y += vy;
 }
 
 function animate() {
 
     requestAnimationFrame( animate );
 
-    //gravity();
+    // minimum of 5 "fps" steps - important for collision detection
+    var dt = Math.min(0.2, clock.getDelta());
+    gravity(dt);
+    render(dt);
 
-    render();
     stats.update();
-
 }
 
-function render() {
+function render(dt) {
 
-    controls.update( clock.getDelta() );
+    controls.update( dt );
     renderer.render( scene, camera );
 
 }
 
+
+init();
+animate();
 
