@@ -204,7 +204,7 @@ THREE.PointerLockControls = function ( camera ) {
 	this.handleResize = function() {};
     
     this.register = function() {
-        var element = document.body;
+        element = document.body;
         var blocker = document.getElementById( 'blocker' );
         var instructions = document.getElementById( 'instructions' );
         
@@ -279,8 +279,47 @@ THREE.PointerLockControls = function ( camera ) {
                 element.requestPointerLock();
 
             }
+            
+            // needs to be here or these don't fire after requestPointerLock
+            element.addEventListener( 'mousedown', onMouseDown, false );
+            element.addEventListener( 'mouseup', onMouseUp, false );
+
 
         }, false );
     
+    };
+    
+    var onMouseDown = function ( event ) {
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        switch ( event.button ) {
+
+            //case 0: this.moveForward = true; break;
+            //case 2: this.moveBackward = true; break;
+
+        }
+
+        this.mouseDragOn = true;
+
+    };    
+    var onMouseUp = function ( event ) {
+
+        event.preventDefault();
+        event.stopPropagation();
+
+
+        switch ( event.button ) {
+
+            //case 0: this.moveForward = false; break;
+            //case 2: this.moveBackward = false; break;
+            case 0: scope.onLeftClick(); break;
+            case 2: scope.onRightClick(); break;
+
+        }
+
+        this.mouseDragOn = false;
+
     };
 };
