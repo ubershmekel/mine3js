@@ -21,8 +21,13 @@ var worldHalfDepth = worldDepth / 2;
 var hdata = generateHeight( worldWidth, worldDepth );
 
 var blockType = {
-    grass: 0,
-    earth: 1
+    grass: 's',
+    earth: 'e',
+    red:   0xff0000,
+    green: 0x00ff00,
+    blue:  0x0000ff,
+    white: 0xffffff,
+    black: 0x000000,
 }
 
 var clock = new THREE.Clock();
@@ -200,7 +205,7 @@ function init() {
     directionalLight.position.set( 1, 1, 0.5 ).normalize();
     scene.add( directionalLight );
 
-    renderer = new THREE.WebGLRenderer( { clearColor: 0xffffff } );
+    renderer = new THREE.WebGLRenderer( { clearColor: 0xddddff, clearAlpha: 1 } );
     renderer.setSize( window.innerWidth, window.innerHeight );
 
     container.innerHTML = "";
@@ -216,42 +221,28 @@ function init() {
 
     window.addEventListener( 'resize', onWindowResize, false );
 
-    var geometry = new THREE.CubeGeometry(3,3,3);
+    makeCube(blockType.red,   0,   20, 0);
+    makeCube(blockType.green, 100, 20, 0);
+    makeCube(blockType.blue,  0,   20, 100);
+}
+
+function makeCube(type, x, y, z) {
+    var geometry = new THREE.CubeGeometry(1,1,1);
+    var color = 0x000000;
+    if (typeof type == "number") {
+        color = type;
+    }
+    
     var ballMaterial = new THREE.MeshLambertMaterial({
-        color : 0x000000,
+        color : color,
         overdraw : true,
         fog: false,
         shading : THREE.FlatShading});
     var mesh = new THREE.Mesh(geometry, ballMaterial);
-    mesh.position.z = 0
-    mesh.position.x = 0
-    mesh.position.y = 20
+    mesh.position.x = x;
+    mesh.position.y = y;
+    mesh.position.z = z;
     scene.add(mesh);
-
-    var geometry = new THREE.CubeGeometry(3,3,3);
-    var ballMaterial = new THREE.MeshLambertMaterial({
-        color : 0x00dd00,
-        overdraw : true,
-        fog: false,
-        shading : THREE.FlatShading});
-    var mesh = new THREE.Mesh(geometry, ballMaterial);
-    mesh.position.z = 100
-    mesh.position.x = 0
-    mesh.position.y = 20
-    scene.add(mesh);
-
-    ballMaterial = new THREE.MeshLambertMaterial({
-        color : 0xdd0000,
-        overdraw : true,
-        fog: false,
-        shading : THREE.FlatShading});
-
-    var mesh = new THREE.Mesh(geometry, ballMaterial);
-    mesh.position.z = 0
-    mesh.position.x = 100
-    mesh.position.y = 20
-    scene.add(mesh);
-
 }
 
 function onWindowResize() {
