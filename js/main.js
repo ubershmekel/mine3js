@@ -307,9 +307,14 @@ function getY( x, z ) {
 
 function isCollided() {
     var pos = camera.position;
-    var ix = Math.floor(pos.x);
+    
+    // You're standing above the cube that's Math.floor and you're
+    // close to the cube that's Math.round near you.
+    var ix = Math.round(pos.x);
+    var iz = Math.round(pos.z);
+    
     var iy = Math.floor(pos.y);
-    var iz = Math.floor(pos.z);
+    
     if(world[[ix, iy, iz]] !== undefined) {
         return true;
     }
@@ -329,111 +334,19 @@ function physics(dt) {
     var pos = camera.position;
     camera.vy = camera.vy - 0.05 * dt // g - gravity
     camera.vy = Math.max(camera.vy, -3); // terminal velocity
-    
-    // collide
-    // test for the 3x3x4 adjacent cubes
-    // though we could optimize and ignore the core 1x1x2
-    /*var ix = Math.floor(pos.x);
-    var iy = Math.floor(pos.y);
-    var iz = Math.floor(pos.z);
-    
-    // floor
-    /*var floor = [ix, iy - playerHeight, iz];
-    if (world[floor] !== undefined) {
-        //console.log([ix, iy - 2, iz]);
-        //console.log(pos)
-        pos.y = Math.max(pos.y, iy + pad);
-        //console.log(pos)
-        camera.vy = 0;
-    }
-    
-    // walls
-    directions.forEach(function(dir) {
-        for(var i = 0; i < playerHeight; i++) {
-            var cube = [ix + dir[0], iy - i, iz + dir[1]];
-            if(world[cube] === undefined) {
-                continue;
-            }
-            
-            if (Math.abs(pos.x - cube[0]) <= pad) {
-                //console.log(pos.x, pos.y, pos.z);
-                if (pos.x > cube[0]) {
-                    pos.x = cube[0] + pad;
-                } else {
-                    pos.x = cube[0] - pad;
-                }
-                //console.log(pos.x, pos.y, pos.z);
-            }
-            
-            if (Math.abs(pos.z - cube[2]) <= pad) {
-                if (pos.z > cube[2]) {
-                    pos.z = cube[2] + pad;
-                } else {
-                    pos.z = cube[2] - pad;
-                }
-            }
-            
-        }
-    });*/
-    
 
-    
-    
-    
-    /*
-    
-    if (world[[ix, iy, iz]] !== undefined) {
-        //console.log([ix, iy - 2, iz]);
-        //console.log(pos)
-        pos.y = Math.max(pos.y, iy + pad);
-        //console.log(pos)
-        vy = 0;
-    }*/
-    
-    /*for (var x = -1; x <= 1; x++) {
-        for (var y = -2; y <= 1; y++) {
-            for (var z = -1; z <= 1; z++) {
-                var cube = [ix + x, iy + y, iz + z];
-                if (world[cube] === undefined) {
-                    continue;
-                }
-                // this cube is in our world
-                //console.log(pos.x, pos.y, pos.z);
-                //console.log(cube);
-                //console.log(world[cube]);
-                if (Math.abs(pos.y - cube[1]) <= pad) {
-                    //console.log(pos.x, pos.y, pos.z);
-                    vy = 0;
-                    if (pos.y > cube[1]) {
-                        pos.y = cube[1] + pad;
-                    } else {
-                        pos.y = cube[1] - pad;
-                    }
-                    //console.log(pos.x, pos.y, pos.z);
-                }
-            }
-        }
-    }*/
-    
-    //console.log(floor, ~~pos.x, ~~pos.z, pos.y);
-    //if (world[floor] === undefined) {
-    //} else {
-    //    pos.y = floor[1] + 2;
-    //}
     pos.y += camera.vy;
     if (isCollided()) {
         pos.y -= camera.vy;
         camera.vy = 0; // to avoid exploding gravity
     }
     
-    //var lookingAt = controls.target;
+    // Figure out the camera viewing direction
     var lookingAt = new THREE.Vector3( 0, 0, -1 );
     lookingAt = lookingAt.applyEuler( camera.rotation, camera.eulerOrder );
 
     var ddx = -lookingAt.z * camera.vx - lookingAt.x * camera.vz;
-    //var ddx = Math.sin(camera.rotation.z) * camera.vx;
     var ddz = lookingAt.x * camera.vx - lookingAt.z * camera.vz;
-    //var ddz = Math.cos(camera.rotation.z) * camera.vz;
     pos.x += ddx;
     if (isCollided()) {
         pos.x -= ddx;
