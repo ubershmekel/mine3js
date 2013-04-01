@@ -44,7 +44,7 @@ function init() {
 
     controls = new THREE.FirstPersonControls( camera );
 
-    controls.movementSpeed = 10;
+    controls.movementSpeed = 8;
     controls.lookSpeed = 0.125;
     controls.lookVertical = true;
     controls.constrainVertical = true;
@@ -379,7 +379,6 @@ function render(dt) {
     renderer.render( scene, camera );
 
 }
-
 
 init();
 animate();
