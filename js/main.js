@@ -32,9 +32,14 @@ function init() {
     container = document.getElementById( 'container' );
 
     camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.01, 200 );
-    camera.position.y = getY( worldHalfWidth, worldHalfDepth ) * 1 + 20;
+    camera.position.y = getY( worldHalfWidth, worldHalfDepth ) * 1 + 5;
     camera.position.x = worldHalfWidth;
     camera.position.z = worldHalfDepth;
+    
+    camera.vx = 0;
+    camera.vy = 0;
+    camera.vz = 0;
+
 
     controls = new THREE.FirstPersonControls( camera );
 
@@ -210,6 +215,42 @@ function init() {
 
     window.addEventListener( 'resize', onWindowResize, false );
 
+    var geometry = new THREE.CubeGeometry(3,3,3);
+    var ballMaterial = new THREE.MeshLambertMaterial({
+        color : 0x000000,
+        overdraw : true,
+        fog: false,
+        shading : THREE.FlatShading});
+    var mesh = new THREE.Mesh(geometry, ballMaterial);
+    mesh.position.z = 0
+    mesh.position.x = 0
+    mesh.position.y = 20
+    scene.add(mesh);
+
+    var geometry = new THREE.CubeGeometry(3,3,3);
+    var ballMaterial = new THREE.MeshLambertMaterial({
+        color : 0x00dd00,
+        overdraw : true,
+        fog: false,
+        shading : THREE.FlatShading});
+    var mesh = new THREE.Mesh(geometry, ballMaterial);
+    mesh.position.z = 100
+    mesh.position.x = 0
+    mesh.position.y = 20
+    scene.add(mesh);
+
+    ballMaterial = new THREE.MeshLambertMaterial({
+        color : 0xdd0000,
+        overdraw : true,
+        fog: false,
+        shading : THREE.FlatShading});
+
+    var mesh = new THREE.Mesh(geometry, ballMaterial);
+    mesh.position.z = 0
+    mesh.position.x = 100
+    mesh.position.y = 20
+    scene.add(mesh);
+
 }
 
 function onWindowResize() {
@@ -264,30 +305,82 @@ function getY( x, z ) {
 
 }
 
+function isCollided() {
+    var pos = camera.position;
+    var ix = Math.floor(pos.x);
+    var iy = Math.floor(pos.y);
+    var iz = Math.floor(pos.z);
+    if(world[[ix, iy, iz]] !== undefined) {
+        return true;
+    }
+    
+    if(world[[ix, iy - 1, iz]] !== undefined) {
+        return true;
+    }
+    
+    return false;
+}
+
 //
 var pad = 0.25;
-var vy = 0;
-function gravity(dt) {
+var directions = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+var playerHeight = 2;
+function physics(dt) {
     var pos = camera.position;
-    vy = vy - 0.1 * dt
-    vy = Math.max(vy, -3); // terminal velocity
-    //vy = 0.1 * dt;
+    camera.vy = camera.vy - 0.05 * dt // g - gravity
+    camera.vy = Math.max(camera.vy, -3); // terminal velocity
     
     // collide
     // test for the 3x3x4 adjacent cubes
     // though we could optimize and ignore the core 1x1x2
-    var ix = ~~pos.x;
+    /*var ix = Math.floor(pos.x);
     var iy = Math.floor(pos.y);
-    var iz = ~~pos.z;
-    if (world[[ix, iy - 2, iz]] !== undefined) {
+    var iz = Math.floor(pos.z);
+    
+    // floor
+    /*var floor = [ix, iy - playerHeight, iz];
+    if (world[floor] !== undefined) {
         //console.log([ix, iy - 2, iz]);
         //console.log(pos)
         pos.y = Math.max(pos.y, iy + pad);
         //console.log(pos)
-        vy = 0;
+        camera.vy = 0;
     }
     
-    /*[1, 0], [-1, 0], [0, 1], [0, -1]
+    // walls
+    directions.forEach(function(dir) {
+        for(var i = 0; i < playerHeight; i++) {
+            var cube = [ix + dir[0], iy - i, iz + dir[1]];
+            if(world[cube] === undefined) {
+                continue;
+            }
+            
+            if (Math.abs(pos.x - cube[0]) <= pad) {
+                //console.log(pos.x, pos.y, pos.z);
+                if (pos.x > cube[0]) {
+                    pos.x = cube[0] + pad;
+                } else {
+                    pos.x = cube[0] - pad;
+                }
+                //console.log(pos.x, pos.y, pos.z);
+            }
+            
+            if (Math.abs(pos.z - cube[2]) <= pad) {
+                if (pos.z > cube[2]) {
+                    pos.z = cube[2] + pad;
+                } else {
+                    pos.z = cube[2] - pad;
+                }
+            }
+            
+        }
+    });*/
+    
+
+    
+    
+    
+    /*
     
     if (world[[ix, iy, iz]] !== undefined) {
         //console.log([ix, iy - 2, iz]);
@@ -327,7 +420,28 @@ function gravity(dt) {
     //} else {
     //    pos.y = floor[1] + 2;
     //}
-    pos.y += vy;
+    pos.y += camera.vy;
+    if (isCollided()) {
+        pos.y -= camera.vy;
+        camera.vy = 0; // to avoid exploding gravity
+    }
+    
+    //var lookingAt = controls.target;
+    var lookingAt = new THREE.Vector3( 0, 0, -1 );
+    lookingAt = lookingAt.applyEuler( camera.rotation, camera.eulerOrder );
+
+    var ddx = -lookingAt.z * camera.vx - lookingAt.x * camera.vz;
+    //var ddx = Math.sin(camera.rotation.z) * camera.vx;
+    var ddz = lookingAt.x * camera.vx - lookingAt.z * camera.vz;
+    //var ddz = Math.cos(camera.rotation.z) * camera.vz;
+    pos.x += ddx;
+    if (isCollided()) {
+        pos.x -= ddx;
+    }
+    pos.z += ddz;
+    if (isCollided()) {
+        pos.z -= ddz;
+    }
 }
 
 function animate() {
@@ -336,8 +450,8 @@ function animate() {
 
     // minimum of 5 "fps" steps - important for collision detection
     var dt = Math.min(0.2, clock.getDelta());
-    gravity(dt);
     render(dt);
+    physics(dt);
 
     stats.update();
 }

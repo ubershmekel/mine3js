@@ -211,11 +211,28 @@ THREE.FirstPersonControls = function ( object, domElement ) {
 
 		var actualMoveSpeed = delta * this.movementSpeed;
 
-		if ( this.moveForward || ( this.autoForward && !this.moveBackward ) ) this.object.translateZ( - ( actualMoveSpeed + this.autoSpeedFactor ) );
-		if ( this.moveBackward ) this.object.translateZ( actualMoveSpeed );
+		if ( this.moveForward || ( this.autoForward && !this.moveBackward ) ) {
+            //this.object.translateZ( - ( actualMoveSpeed + this.autoSpeedFactor ) );
+            this.object.vz = -actualMoveSpeed; //- ( actualMoveSpeed + this.autoSpeedFactor );
+        } else {
+            if ( this.moveBackward ) {
+                this.object.vz = actualMoveSpeed;
+            } else {
+                this.object.vz = 0;
+            }
+        }
 
-		if ( this.moveLeft ) this.object.translateX( - actualMoveSpeed );
-		if ( this.moveRight ) this.object.translateX( actualMoveSpeed );
+		if ( this.moveLeft ) {
+            //this.object.translateX( - actualMoveSpeed );
+            this.object.vx = -actualMoveSpeed;
+        } else {
+            if ( this.moveRight ) {
+                this.object.vx = actualMoveSpeed;
+            } else {
+                this.object.vx = 0;
+            }
+        }
+		//if ( this.moveRight ) this.object.translateX( actualMoveSpeed );
 
 		if ( this.moveUp ) this.object.translateY( actualMoveSpeed );
 		if ( this.moveDown ) this.object.translateY( - actualMoveSpeed );
