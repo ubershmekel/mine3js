@@ -32,13 +32,14 @@ function init() {
     container = document.getElementById( 'container' );
 
     camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.01, 200 );
-    camera.position.y = getY( worldHalfWidth, worldHalfDepth ) * 1 + 5;
+    camera.position.y = getY( worldHalfWidth, worldHalfDepth ) + 2;
     camera.position.x = worldHalfWidth;
     camera.position.z = worldHalfDepth;
     
     camera.vx = 0;
     camera.vy = 0;
     camera.vz = 0;
+    camera.onGround = true;
 
 
     controls = new THREE.FirstPersonControls( camera );
@@ -330,15 +331,18 @@ function isCollided() {
 var pad = 0.25;
 var directions = [[1, 0], [-1, 0], [0, 1], [0, -1]];
 var playerHeight = 2;
+// g force = jump_speed * 0.5 / max_jump_height
+var gravity = 0.3;
 function physics(dt) {
     var pos = camera.position;
-    camera.vy = camera.vy - 0.05 * dt // g - gravity
-    camera.vy = Math.max(camera.vy, -3); // terminal velocity
+    camera.vy = camera.vy - gravity * dt
+    camera.vy = Math.max(camera.vy, -5); // terminal velocity
 
     pos.y += camera.vy;
     if (isCollided()) {
         pos.y -= camera.vy;
         camera.vy = 0; // to avoid exploding gravity
+        camera.onGround = true;
     }
     
     // Figure out the camera viewing direction

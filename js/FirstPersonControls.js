@@ -234,9 +234,16 @@ THREE.FirstPersonControls = function ( object, domElement ) {
         }
 		//if ( this.moveRight ) this.object.translateX( actualMoveSpeed );
 
-		if ( this.moveUp ) this.object.translateY( actualMoveSpeed );
-		if ( this.moveDown ) this.object.translateY( - actualMoveSpeed );
-
+        if ( this.fly ) {
+            if ( this.moveUp ) this.object.translateY( actualMoveSpeed );
+            if ( this.moveDown ) this.object.translateY( - actualMoveSpeed );
+        } else {
+            // g force = jump_speed * 0.5 / max_jump_height
+            if ( this.moveUp  && this.object.onGround) {
+                this.object.onGround = false;
+                this.object.vy = 0.12;
+            }
+        }
 		var actualLookSpeed = delta * this.lookSpeed;
 
 		if ( !this.activeLook ) {
