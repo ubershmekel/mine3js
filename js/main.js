@@ -38,16 +38,38 @@ var blockType = {
 var hdata = generateHeight( worldWidth, worldDepth );
 var clock = new THREE.Clock();
 
+var maxPlacementRange = 10;
+var collideVectorStepSize = 0.2;
+
 function getPointyTarget() {
-    var d = camera.direction();
-    d.multiplyScalar(2);
-    d.add(camera.position);
-    return [Math.round(d.x), Math.round(d.y), Math.round(d.z)];
+    // Tracks down the target for destroying cubes
+    // and the previous point for constructing cubes.
+    var dir = camera.direction();
+    dir.multiplyScalar(collideVectorStepSize);
+    var dist = 0;
+    var vec = camera.position.clone();
+    var prevPoint = undefined;
+    
+    while(dist < maxPlacementRange) {
+        dist += collideVectorStepSize;
+        vec.add(dir);
+        var point = [Math.round(vec.x), Math.round(vec.y), Math.round(vec.z)];
+       
+        if (world[point] !== undefined) {
+            return [prevPoint, point];
+        }
+        
+        if (point != prevPoint) {
+            prevPoint = point;
+        }
+    }
+    
+    return [undefined, undefined];
 }
 
 function onLeftClick() {
     // TODO: convert these to mousedown and mouseup
-    var target = getPointyTarget();
+    var target = getPointyTarget()[0];
     makeCube(blockType.dirt, target);
 }
 
@@ -128,7 +150,15 @@ function init() {
 function makeCube(type, point) {
     if (world[point] !== undefined) {
         console.log("Tried to create in occupied block");
+        return;
     }
+    world[point] = 0;
+    if(isCollided()) {
+        console.log("Tried to create block inside body");
+        delete world[point];
+        return;
+    }
+    
     var geometry = new THREE.CubeGeometry(1,1,1);
     var color = 0x000000;
     if (typeof type == "number") {
