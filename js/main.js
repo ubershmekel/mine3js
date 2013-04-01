@@ -12,7 +12,8 @@ var container, stats;
 
 var camera, controls, scene, renderer;
 
-var mesh, mat;
+var mesh;
+var mat = {};
 
 //
 // g force = jump_speed * 0.5 / max_jump_height
@@ -27,7 +28,7 @@ var hdata = generateHeight( worldWidth, worldDepth );
 
 var blockType = {
     grass: 'g',
-    earth: 'e',
+    dirt: 'e',
     red:   0xff0000,
     green: 0x00ff00,
     blue:  0x0000ff,
@@ -40,6 +41,10 @@ var clock = new THREE.Clock();
 function onLeftClick() {
     // TODO: convert these to mousedown and mouseup
     console.log('left');
+    var d = camera.direction();
+    d.multiplyScalar(2);
+    d.add(camera.position);
+    makeCube(blockType.dirt, Math.round(d.x), Math.round(d.y), Math.round(d.z));
 }
 
 function onRightClick() {
@@ -117,25 +122,35 @@ function init() {
 }
 
 function makeCube(type, x, y, z) {
+    var point = [x, y, z];
+    if (world[point] !== undefined) {
+        console.log("Tried to create in occupied block");
+    }
     var geometry = new THREE.CubeGeometry(1,1,1);
     var color = 0x000000;
     if (typeof type == "number") {
         color = type;
     }
     
-    var ballMaterial = new THREE.MeshLambertMaterial({
+    var material;
+    if (type == blockType.dirt) {
+        material = mat.dirt;
+    } else {
+        material = new THREE.MeshLambertMaterial({
         color : color,
         overdraw : true,
         fog: false,
         shading : THREE.FlatShading});
-    var mesh = new THREE.Mesh(geometry, ballMaterial);
+    
+    }
+    var mesh = new THREE.Mesh(geometry, material);
     mesh.position.x = x;
     mesh.position.y = y;
     mesh.position.z = z;
     
     // for physics
     mesh.blockType = type;
-    world[[x, y, z]] = mesh;
+    world[point] = mesh;
     
     scene.add(mesh);
 }
@@ -265,14 +280,19 @@ function generateLandscape() {
     textureGrass.magFilter = THREE.NearestFilter;
     textureGrass.minFilter = THREE.LinearMipMapLinearFilter;
 
+    var textureDirt = THREE.ImageUtils.loadTexture( 'img/dirt.png' );
+    textureGrass.magFilter = THREE.NearestFilter;
+    textureGrass.minFilter = THREE.LinearMipMapLinearFilter;
+
     var textureGrassDirt = THREE.ImageUtils.loadTexture( 'img/grass_dirt.png' );
     textureGrassDirt.magFilter = THREE.NearestFilter;
     textureGrassDirt.minFilter = THREE.LinearMipMapLinearFilter;
 
-    var material1 = new THREE.MeshLambertMaterial( { map: textureGrass, ambient: 0xbbbbbb, vertexColors: THREE.VertexColors } );
-    var material2 = new THREE.MeshLambertMaterial( { map: textureGrassDirt, ambient: 0xbbbbbb, vertexColors: THREE.VertexColors } );
+    mat.grass = new THREE.MeshLambertMaterial( { map: textureGrass, ambient: 0xbbbbbb, vertexColors: THREE.VertexColors } );
+    mat.dirt = new THREE.MeshLambertMaterial( { map: textureDirt, ambient: 0xbbbbbb, vertexColors: THREE.VertexColors } );
+    mat.grassDirt = new THREE.MeshLambertMaterial( { map: textureGrassDirt, ambient: 0xbbbbbb, vertexColors: THREE.VertexColors } );
 
-    var mesh = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( [ material1, material2 ] ) );
+    var mesh = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( [ mat.grass, mat.grassDirt ] ) );
     scene.add( mesh );
 }
 
