@@ -56,7 +56,7 @@ function init() {
     container = document.getElementById( 'container' );
 
     camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.01, 200 );
-    camera.position.y = getY( worldHalfWidth, worldHalfDepth ) + 2;
+    camera.position.y = landscapeY( worldHalfWidth, worldHalfDepth ) + 2;
     camera.position.x = worldHalfWidth;
     camera.position.z = worldHalfDepth;
     
@@ -196,7 +196,7 @@ function generateLandscape() {
     for ( var z = 0; z < worldDepth; z ++ ) {
 
         for ( var x = 0; x < worldWidth; x ++ ) {
-            var h = getY( x, z );
+            var h = landscapeY( x, z );
             //console.log(x, z, h);
 
             world[[x, h, z]] = blockType.grass;
@@ -204,15 +204,15 @@ function generateLandscape() {
             dummy.position.y = h;
             dummy.position.z = z;
 
-            var px = getY( x + 1, z );
-            var nx = getY( x - 1, z );
-            var pz = getY( x, z + 1 );
-            var nz = getY( x, z - 1 );
+            var px = landscapeY( x + 1, z );
+            var nx = landscapeY( x - 1, z );
+            var pz = landscapeY( x, z + 1 );
+            var nz = landscapeY( x, z - 1 );
 
-            var pxpz = getY( x + 1, z + 1 );
-            var nxpz = getY( x - 1, z + 1 );
-            var pxnz = getY( x + 1, z - 1 );
-            var nxnz = getY( x - 1, z - 1 );
+            var pxpz = landscapeY( x + 1, z + 1 );
+            var nxpz = landscapeY( x - 1, z + 1 );
+            var pxnz = landscapeY( x + 1, z - 1 );
+            var nxnz = landscapeY( x - 1, z - 1 );
 
             dummy.geometry = pyGeometry;
 
@@ -342,7 +342,7 @@ function generateHeight( width, height ) {
 
 }
 
-function getY( x, z ) {
+function landscapeY( x, z ) {
 
     return ( hdata[ x + z * worldWidth ] * 0.2 ) | 0;
 
