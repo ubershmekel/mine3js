@@ -83,10 +83,13 @@ function init() {
 
     container = document.getElementById( 'container' );
 
-    camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.01, 200 );
-    camera.position.y = landscapeY( worldHalfWidth, worldHalfDepth ) + 2;
-    camera.position.x = worldHalfWidth;
-    camera.position.z = worldHalfDepth;
+    scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2( skyColor, 0.015 );
+    initMaterials();
+    world = {};
+
+    camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.01, 200 );
+    
     
     camera.vx = 0;
     camera.vy = 0;
@@ -102,9 +105,16 @@ function init() {
     var hasPointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;;
     if (hasPointerLock) {
         controls = new THREE.PointerLockControls( camera );
+        controls.register();
+        scene.add( controls.getObject() );
     } else {
         controls = new THREE.FirstPersonControls( camera );
     }
+
+    controls.getObject().position.y = landscapeY( worldHalfWidth, worldHalfDepth ) + 2;
+    controls.getObject().position.x = worldHalfWidth;
+    controls.getObject().position.z = worldHalfDepth;
+
     controls.onLeftClick = onLeftClick;
     controls.onRightClick = onRightClick;
     
@@ -115,14 +125,6 @@ function init() {
     controls.verticalMin = 1.1;
     controls.verticalMax = 2.2;
 
-    scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2( skyColor, 0.015 );
-
-
-
-    world = {};
-    
-    initMaterials();
     generateLandscape();
 
 
@@ -441,7 +443,7 @@ function physics(dt) {
     camera.vy = camera.vy - gravity * dt
     camera.vy = Math.max(camera.vy, -5); // terminal velocity
 
-    pos.y += camera.vy;
+    //pos.y += camera.vy;
     if (isCollided()) {
         pos.y -= camera.vy;
         camera.vy = 0; // to avoid exploding gravity
