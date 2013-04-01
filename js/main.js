@@ -32,6 +32,14 @@ var blockType = {
 
 var clock = new THREE.Clock();
 
+function onLeftClick() {
+    console.log('left');
+}
+
+function onRightClick() {
+    console.log('right');
+}
+
 function init() {
 
     container = document.getElementById( 'container' );
@@ -48,7 +56,9 @@ function init() {
 
 
     controls = new THREE.FirstPersonControls( camera );
-
+    controls.onLeftClick = onLeftClick;
+    controls.onRightClick = onRightClick;
+    
     controls.movementSpeed = 8;
     controls.lookSpeed = 0.125;
     controls.lookVertical = true;
@@ -59,6 +69,69 @@ function init() {
     scene = new THREE.Scene();
     scene.fog = new THREE.FogExp2( 0xffffff, 0.00015 );
 
+
+
+    //
+    world = {};
+    generateLandscape();
+
+
+    var ambientLight = new THREE.AmbientLight( 0xcccccc );
+    scene.add( ambientLight );
+
+    var directionalLight = new THREE.DirectionalLight( 0xffffff, 2 );
+    directionalLight.position.set( 1, 1, 0.5 ).normalize();
+    scene.add( directionalLight );
+
+    renderer = new THREE.WebGLRenderer( { clearColor: 0xddddff, clearAlpha: 1 } );
+    renderer.setSize( window.innerWidth, window.innerHeight );
+
+    container.innerHTML = "";
+
+    container.appendChild( renderer.domElement );
+
+    stats = new Stats();
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.top = '0px';
+    container.appendChild( stats.domElement );
+
+    //
+
+    window.addEventListener( 'resize', onWindowResize, false );
+
+    // some sun/moon to reach for, and mark the axis
+    makeCube(blockType.red,   0,   20, 0);
+    makeCube(blockType.green, 100, 20, 0);
+    makeCube(blockType.blue,  0,   20, 100);
+}
+
+function makeCube(type, x, y, z) {
+    var geometry = new THREE.CubeGeometry(1,1,1);
+    var color = 0x000000;
+    if (typeof type == "number") {
+        color = type;
+    }
+    
+    var ballMaterial = new THREE.MeshLambertMaterial({
+        color : color,
+        overdraw : true,
+        fog: false,
+        shading : THREE.FlatShading});
+    var mesh = new THREE.Mesh(geometry, ballMaterial);
+    mesh.position.x = x;
+    mesh.position.y = y;
+    mesh.position.z = z;
+    
+    // for physics
+    mesh.blockType = type;
+    world[[x, y, z]] = mesh;
+    
+    scene.add(mesh);
+}
+
+function generateLandscape() {
+    var geometry = new THREE.Geometry();
+    var dummy = new THREE.Mesh();
     // sides
 
     var light = new THREE.Color( 0xffffff );
@@ -94,13 +167,6 @@ function init() {
     nzGeometry.faces[ 0 ].vertexColors = [ light, shadow, shadow, light ];
     nzGeometry.applyMatrix( matrix.makeRotationY( Math.PI ) );
     nzGeometry.applyMatrix( matrix.makeTranslation( 0, 0, -0.5 ) );
-
-    //
-
-    var geometry = new THREE.Geometry();
-    var dummy = new THREE.Mesh();
-    world = {};
-
     for ( var z = 0; z < worldDepth; z ++ ) {
 
         for ( var x = 0; x < worldWidth; x ++ ) {
@@ -197,58 +263,6 @@ function init() {
 
     var mesh = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( [ material1, material2 ] ) );
     scene.add( mesh );
-
-    var ambientLight = new THREE.AmbientLight( 0xcccccc );
-    scene.add( ambientLight );
-
-    var directionalLight = new THREE.DirectionalLight( 0xffffff, 2 );
-    directionalLight.position.set( 1, 1, 0.5 ).normalize();
-    scene.add( directionalLight );
-
-    renderer = new THREE.WebGLRenderer( { clearColor: 0xddddff, clearAlpha: 1 } );
-    renderer.setSize( window.innerWidth, window.innerHeight );
-
-    container.innerHTML = "";
-
-    container.appendChild( renderer.domElement );
-
-    stats = new Stats();
-    stats.domElement.style.position = 'absolute';
-    stats.domElement.style.top = '0px';
-    container.appendChild( stats.domElement );
-
-    //
-
-    window.addEventListener( 'resize', onWindowResize, false );
-
-    // some sun/moon to reach for, and mark the axis
-    makeCube(blockType.red,   0,   20, 0);
-    makeCube(blockType.green, 100, 20, 0);
-    makeCube(blockType.blue,  0,   20, 100);
-}
-
-function makeCube(type, x, y, z) {
-    var geometry = new THREE.CubeGeometry(1,1,1);
-    var color = 0x000000;
-    if (typeof type == "number") {
-        color = type;
-    }
-    
-    var ballMaterial = new THREE.MeshLambertMaterial({
-        color : color,
-        overdraw : true,
-        fog: false,
-        shading : THREE.FlatShading});
-    var mesh = new THREE.Mesh(geometry, ballMaterial);
-    mesh.position.x = x;
-    mesh.position.y = y;
-    mesh.position.z = z;
-    
-    // for physics
-    mesh.blockType = type;
-    world[[x, y, z]] = mesh;
-    
-    scene.add(mesh);
 }
 
 function onWindowResize() {
