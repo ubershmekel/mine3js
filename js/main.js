@@ -106,14 +106,14 @@ function init() {
     if (hasPointerLock) {
         controls = new THREE.PointerLockControls( camera );
         controls.register();
-        scene.add( controls.getObject() );
+        //scene.add( controls.getObject() );
     } else {
         controls = new THREE.FirstPersonControls( camera );
     }
 
-    controls.getObject().position.y = landscapeY( worldHalfWidth, worldHalfDepth ) + 2;
-    controls.getObject().position.x = worldHalfWidth;
-    controls.getObject().position.z = worldHalfDepth;
+    camera.position.y = landscapeY( worldHalfWidth, worldHalfDepth ) + 2;
+    camera.position.x = worldHalfWidth;
+    camera.position.z = worldHalfDepth;
 
     controls.onLeftClick = onLeftClick;
     controls.onRightClick = onRightClick;
@@ -122,8 +122,8 @@ function init() {
     controls.lookSpeed = 0.125;
     controls.lookVertical = true;
     controls.constrainVertical = true;
-    controls.verticalMin = 1.1;
-    controls.verticalMax = 2.2;
+    //controls.verticalMin = 1.1;
+    //controls.verticalMax = 2.2;
 
     generateLandscape();
 
@@ -443,7 +443,7 @@ function physics(dt) {
     camera.vy = camera.vy - gravity * dt
     camera.vy = Math.max(camera.vy, -5); // terminal velocity
 
-    //pos.y += camera.vy;
+    pos.y += camera.vy;
     if (isCollided()) {
         pos.y -= camera.vy;
         camera.vy = 0; // to avoid exploding gravity

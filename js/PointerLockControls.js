@@ -6,13 +6,17 @@ THREE.PointerLockControls = function ( camera ) {
 
 	var scope = this;
 
-	var pitchObject = new THREE.Object3D();
-	pitchObject.add( camera );
-
-	var yawObject = new THREE.Object3D();
-	yawObject.position.y = 10;
-	yawObject.add( pitchObject );
-
+    camera.target = new THREE.Vector3( 0, 0, 0 );
+    scope.lookVertical = true;
+    scope.lon = 0;
+    scope.lat = 0;
+    scope.dxSpeed = 0.1;
+    scope.dySpeed = 0.3;
+    scope.verticalMin = 0;
+    scope.verticalMax = Math.PI;
+    
+    scope.movementSpeed = 1.0;
+    
 	var moveForward = false;
 	var moveBackward = false;
 	var moveLeft = false;
@@ -32,12 +36,37 @@ THREE.PointerLockControls = function ( camera ) {
 		var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
 		var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
 
-		yawObject.rotation.y -= movementX * 0.002;
-		pitchObject.rotation.x -= movementY * 0.002;
+		//yawObject.rotation.y -= movementX * 0.002;
+		//pitchObject.rotation.x -= movementY * 0.002;
+        mouseDelta(movementX, movementY);
 
-		pitchObject.rotation.x = Math.max( - PI_2, Math.min( PI_2, pitchObject.rotation.x ) );
+		//pitchObject.rotation.x = Math.max( - PI_2, Math.min( PI_2, pitchObject.rotation.x ) );
 
 	};
+    
+    var mouseDelta = function(dx, dy) {
+        scope.lon += dx * scope.dxSpeed;
+        if( scope.lookVertical ) scope.lat -= dy * scope.dySpeed;
+
+        scope.lat = Math.max( - 85, Math.min( 85, scope.lat ) );
+        scope.phi = THREE.Math.degToRad( 90 - scope.lat );
+
+        scope.theta = THREE.Math.degToRad( scope.lon );
+
+        if ( scope.constrainVertical ) {
+
+            scope.phi = THREE.Math.mapLinear( scope.phi, 0, Math.PI, scope.verticalMin, scope.verticalMax );
+
+        }
+
+        position = camera.position;
+
+        camera.target.x = position.x + 100 * Math.sin( scope.phi ) * Math.cos( scope.theta );
+        camera.target.y = position.y + 100 * Math.cos( scope.phi );
+        camera.target.z = position.z + 100 * Math.sin( scope.phi ) * Math.sin( scope.theta );
+
+        camera.lookAt( camera.target );    
+    }
 
 	var onKeyDown = function ( event ) {
 
@@ -105,11 +134,11 @@ THREE.PointerLockControls = function ( camera ) {
 
 	this.enabled = false;
 
-	this.getObject = function () {
+	/*this.getObject = function () {
 
 		return yawObject;
 
-	};
+	};*/
 
 	this.isOnObject = function ( boolean ) {
 
@@ -122,18 +151,20 @@ THREE.PointerLockControls = function ( camera ) {
 
 		if ( scope.enabled === false ) return;
 
-		delta *= 0.1;
-
 		/*velocity.x += ( - velocity.x ) * 0.08 * delta;
 		velocity.z += ( - velocity.z ) * 0.08 * delta;
 
 		velocity.y -= 0.25 * delta;*/
 
-		if ( moveForward ) velocity.z -= 0.12 * delta;
-		if ( moveBackward ) velocity.z += 0.12 * delta;
+        velocity.x = 0;
+        velocity.y = 0;
+        velocity.z = 0;
+        
+		if ( moveForward ) velocity.z -= scope.movementSpeed * delta;
+		if ( moveBackward ) velocity.z += scope.movementSpeed * delta;
 
-		if ( moveLeft ) velocity.x -= 0.12 * delta;
-		if ( moveRight ) velocity.x += 0.12 * delta;
+		if ( moveLeft ) velocity.x -= scope.movementSpeed * delta;
+		if ( moveRight ) velocity.x += scope.movementSpeed * delta;
 
 		if ( isOnObject === true ) {
 
@@ -141,18 +172,18 @@ THREE.PointerLockControls = function ( camera ) {
 
 		}
 
-		yawObject.translateX( velocity.x );
-		yawObject.translateY( velocity.y ); 
-		yawObject.translateZ( velocity.z );
+		camera.vx = velocity.x;
+		camera.vy = velocity.y; 
+		camera.vz = velocity.z ;
 
-		if ( yawObject.position.y < 10 ) {
+		/*if ( yawObject.position.y < 10 ) {
 
 			velocity.y = 0;
 			yawObject.position.y = 10;
 
 			canJump = true;
 
-		}
+		}*/
 
 	};
 	this.handleResize = function() {};
