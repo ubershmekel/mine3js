@@ -21,6 +21,8 @@ THREE.PointerLockControls = function ( camera ) {
 	var moveBackward = false;
 	var moveLeft = false;
 	var moveRight = false;
+	var moveUp = false;
+	var moveDown = false;
 
 	var isOnObject = false;
 	var canJump = false;
@@ -91,10 +93,9 @@ THREE.PointerLockControls = function ( camera ) {
 				moveRight = true;
 				break;
 
-			case 32: // space
-				if ( canJump === true ) velocity.y += 10;
-				canJump = false;
-				break;
+            case 32: /*space*/
+            case 82: /*R*/ moveUp = true; break;
+            case 70: /*F*/ moveDown = true; break;
 
 		}
 
@@ -124,6 +125,9 @@ THREE.PointerLockControls = function ( camera ) {
 				moveRight = false;
 				break;
 
+            case 32: /*space*/
+            case 82: /*R*/ moveUp = false; break;
+            case 70: /*F*/ moveDown = false; break;
 		}
 
 	};
@@ -173,9 +177,20 @@ THREE.PointerLockControls = function ( camera ) {
 		}
 
 		camera.vx = velocity.x;
-		camera.vy = velocity.y; 
+		//camera.vy = velocity.y; 
 		camera.vz = velocity.z ;
 
+        if ( this.fly ) {
+            if ( moveUp ) camera.translateY( actualMoveSpeed );
+            if ( moveDown ) camera.translateY( - actualMoveSpeed );
+        } else {
+            // g force = jump_speed * 0.5 / max_jump_height
+            if ( moveUp  && camera.isOnGround) {
+                camera.isOnGround = false;
+                camera.vy = 0.12;
+            }
+        }
+        
 		/*if ( yawObject.position.y < 10 ) {
 
 			velocity.y = 0;
