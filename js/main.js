@@ -99,7 +99,12 @@ function init() {
         return lookingAt;
     }
 
-    controls = new THREE.FirstPersonControls( camera );
+    var hasPointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;;
+    if (hasPointerLock) {
+        controls = new THREE.PointerLockControls( camera );
+    } else {
+        controls = new THREE.FirstPersonControls( camera );
+    }
     controls.onLeftClick = onLeftClick;
     controls.onRightClick = onRightClick;
     
