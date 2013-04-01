@@ -14,6 +14,11 @@ var camera, controls, scene, renderer;
 
 var mesh, mat;
 
+//
+// g force = jump_speed * 0.5 / max_jump_height
+var gravity = 0.3;
+var skyColor = 0xddddff;
+
 // in blocks
 var worldWidth = 200, worldDepth = 200;
 var worldHalfWidth = worldWidth / 2;
@@ -21,7 +26,7 @@ var worldHalfDepth = worldDepth / 2;
 var hdata = generateHeight( worldWidth, worldDepth );
 
 var blockType = {
-    grass: 's',
+    grass: 'g',
     earth: 'e',
     red:   0xff0000,
     green: 0x00ff00,
@@ -33,6 +38,7 @@ var blockType = {
 var clock = new THREE.Clock();
 
 function onLeftClick() {
+    // TODO: convert these to mousedown and mouseup
     console.log('left');
 }
 
@@ -52,8 +58,13 @@ function init() {
     camera.vx = 0;
     camera.vy = 0;
     camera.vz = 0;
-    camera.onGround = true;
-
+    camera.isOnGround = true;
+    camera.direction = function() {
+        // Figure out the camera viewing direction
+        var lookingAt = new THREE.Vector3( 0, 0, -1 );
+        lookingAt = lookingAt.applyEuler( camera.rotation, camera.eulerOrder );
+        return lookingAt;
+    }
 
     controls = new THREE.FirstPersonControls( camera );
     controls.onLeftClick = onLeftClick;
@@ -67,7 +78,7 @@ function init() {
     controls.verticalMax = 2.2;
 
     scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2( 0xffffff, 0.00015 );
+    scene.fog = new THREE.FogExp2( skyColor, 0.015 );
 
 
 
@@ -83,7 +94,7 @@ function init() {
     directionalLight.position.set( 1, 1, 0.5 ).normalize();
     scene.add( directionalLight );
 
-    renderer = new THREE.WebGLRenderer( { clearColor: 0xddddff, clearAlpha: 1 } );
+    renderer = new THREE.WebGLRenderer( { clearColor: skyColor, clearAlpha: 1 } );
     renderer.setSize( window.innerWidth, window.innerHeight );
 
     container.innerHTML = "";
@@ -338,12 +349,7 @@ function isCollided() {
     return false;
 }
 
-//
-var pad = 0.25;
-var directions = [[1, 0], [-1, 0], [0, 1], [0, -1]];
-var playerHeight = 2;
-// g force = jump_speed * 0.5 / max_jump_height
-var gravity = 0.3;
+
 function physics(dt) {
     var pos = camera.position;
     camera.vy = camera.vy - gravity * dt
@@ -353,13 +359,10 @@ function physics(dt) {
     if (isCollided()) {
         pos.y -= camera.vy;
         camera.vy = 0; // to avoid exploding gravity
-        camera.onGround = true;
+        camera.isOnGround = true;
     }
     
-    // Figure out the camera viewing direction
-    var lookingAt = new THREE.Vector3( 0, 0, -1 );
-    lookingAt = lookingAt.applyEuler( camera.rotation, camera.eulerOrder );
-
+    var lookingAt = camera.direction();
     var ddx = -lookingAt.z * camera.vx - lookingAt.x * camera.vz;
     var ddz = lookingAt.x * camera.vx - lookingAt.z * camera.vz;
     pos.x += ddx;

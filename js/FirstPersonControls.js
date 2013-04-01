@@ -241,8 +241,8 @@ THREE.FirstPersonControls = function ( object, domElement ) {
             if ( this.moveDown ) this.object.translateY( - actualMoveSpeed );
         } else {
             // g force = jump_speed * 0.5 / max_jump_height
-            if ( this.moveUp  && this.object.onGround) {
-                this.object.onGround = false;
+            if ( this.moveUp  && this.object.isOnGround) {
+                this.object.isOnGround = false;
                 this.object.vy = 0.12;
             }
         }
