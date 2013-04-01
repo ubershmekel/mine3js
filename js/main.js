@@ -68,13 +68,15 @@ function getPointyTarget() {
 }
 
 function onLeftClick() {
-    // TODO: convert these to mousedown and mouseup
+    // TODO: convert to mousedown and mouseup
     var target = getPointyTarget()[0];
     makeCube(blockType.dirt, target);
 }
 
 function onRightClick() {
-    console.log('right');
+    // TODO: convert to mousedown and mouseup
+    var target = getPointyTarget()[1];
+    destroyCube(target);
 }
 
 function init() {
@@ -113,8 +115,9 @@ function init() {
 
 
 
-    //
     world = {};
+    
+    initMaterials();
     generateLandscape();
 
 
@@ -147,12 +150,35 @@ function init() {
     makeCube(blockType.blue,  [0,   20, 100]);
 }
 
+function destroyCube(point) {
+    if (world[point] === undefined) {
+        console.log("Tried to destroy in empty block");
+        return;
+    }
+    if (world[point].blockType == blockType.grass) {
+        console.log("Destroying grass not yet implemented");
+        return;
+    }
+    
+    var obj = world[point];
+    scene.remove(obj);
+    //obj.dispose();
+    //obj.deallocate(); 
+    //obj.geometry.deallocate();
+    //obj.material.deallocate();
+    //obj.material.map.deallocate();
+    //renderer.deallocateObject( obj );
+    //renderer.deallocateTexture( texture );
+    //renderer.deallocateMaterial( material );  
+    delete world[point];
+}
+
 function makeCube(type, point) {
     if (world[point] !== undefined) {
         console.log("Tried to create in occupied block");
         return;
     }
-    world[point] = 0;
+    world[point] = NaN; // temp val for collision test
     if(isCollided()) {
         console.log("Tried to create block inside body");
         delete world[point];
@@ -186,6 +212,24 @@ function makeCube(type, point) {
     world[point] = mesh;
     
     scene.add(mesh);
+}
+
+function initMaterials() {
+    var textureGrass = THREE.ImageUtils.loadTexture( 'img/grass.png' );
+    textureGrass.magFilter = THREE.NearestFilter;
+    textureGrass.minFilter = THREE.LinearMipMapLinearFilter;
+
+    var textureDirt = THREE.ImageUtils.loadTexture( 'img/dirt.png' );
+    textureGrass.magFilter = THREE.NearestFilter;
+    textureGrass.minFilter = THREE.LinearMipMapLinearFilter;
+
+    var textureGrassDirt = THREE.ImageUtils.loadTexture( 'img/grass_dirt.png' );
+    textureGrassDirt.magFilter = THREE.NearestFilter;
+    textureGrassDirt.minFilter = THREE.LinearMipMapLinearFilter;
+
+    mat.grass = new THREE.MeshLambertMaterial( { map: textureGrass, ambient: 0xbbbbbb, vertexColors: THREE.VertexColors } );
+    mat.dirt = new THREE.MeshLambertMaterial( { map: textureDirt, ambient: 0xbbbbbb, vertexColors: THREE.VertexColors } );
+    mat.grassDirt = new THREE.MeshLambertMaterial( { map: textureGrassDirt, ambient: 0xbbbbbb, vertexColors: THREE.VertexColors } );
 }
 
 function generateLandscape() {
@@ -232,7 +276,7 @@ function generateLandscape() {
             var h = landscapeY( x, z );
             //console.log(x, z, h);
 
-            world[[x, h, z]] = blockType.grass;
+            world[[x, h, z]] = {blockType: blockType.grass};
             dummy.position.x = x;
             dummy.position.y = h;
             dummy.position.z = z;
@@ -308,22 +352,6 @@ function generateLandscape() {
         }
 
     }
-
-    var textureGrass = THREE.ImageUtils.loadTexture( 'img/grass.png' );
-    textureGrass.magFilter = THREE.NearestFilter;
-    textureGrass.minFilter = THREE.LinearMipMapLinearFilter;
-
-    var textureDirt = THREE.ImageUtils.loadTexture( 'img/dirt.png' );
-    textureGrass.magFilter = THREE.NearestFilter;
-    textureGrass.minFilter = THREE.LinearMipMapLinearFilter;
-
-    var textureGrassDirt = THREE.ImageUtils.loadTexture( 'img/grass_dirt.png' );
-    textureGrassDirt.magFilter = THREE.NearestFilter;
-    textureGrassDirt.minFilter = THREE.LinearMipMapLinearFilter;
-
-    mat.grass = new THREE.MeshLambertMaterial( { map: textureGrass, ambient: 0xbbbbbb, vertexColors: THREE.VertexColors } );
-    mat.dirt = new THREE.MeshLambertMaterial( { map: textureDirt, ambient: 0xbbbbbb, vertexColors: THREE.VertexColors } );
-    mat.grassDirt = new THREE.MeshLambertMaterial( { map: textureGrassDirt, ambient: 0xbbbbbb, vertexColors: THREE.VertexColors } );
 
     var mesh = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( [ mat.grass, mat.grassDirt ] ) );
     scene.add( mesh );
