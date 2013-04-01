@@ -24,11 +24,10 @@ var skyColor = 0xddddff;
 var worldWidth = 200, worldDepth = 200;
 var worldHalfWidth = worldWidth / 2;
 var worldHalfDepth = worldDepth / 2;
-var hdata = generateHeight( worldWidth, worldDepth );
 
 var blockType = {
     grass: 'g',
-    dirt: 'e',
+    dirt: 'd',
     red:   0xff0000,
     green: 0x00ff00,
     blue:  0x0000ff,
@@ -36,15 +35,20 @@ var blockType = {
     black: 0x000000,
 }
 
+var hdata = generateHeight( worldWidth, worldDepth );
 var clock = new THREE.Clock();
 
-function onLeftClick() {
-    // TODO: convert these to mousedown and mouseup
-    console.log('left');
+function getPointyTarget() {
     var d = camera.direction();
     d.multiplyScalar(2);
     d.add(camera.position);
-    makeCube(blockType.dirt, Math.round(d.x), Math.round(d.y), Math.round(d.z));
+    return [Math.round(d.x), Math.round(d.y), Math.round(d.z)];
+}
+
+function onLeftClick() {
+    // TODO: convert these to mousedown and mouseup
+    var target = getPointyTarget();
+    makeCube(blockType.dirt, target);
 }
 
 function onRightClick() {
@@ -116,13 +120,12 @@ function init() {
     window.addEventListener( 'resize', onWindowResize, false );
 
     // some sun/moon to reach for, and mark the axis
-    makeCube(blockType.red,   0,   20, 0);
-    makeCube(blockType.green, 100, 20, 0);
-    makeCube(blockType.blue,  0,   20, 100);
+    makeCube(blockType.red,   [0,   20, 0]);
+    makeCube(blockType.green, [100, 20, 0]);
+    makeCube(blockType.blue,  [0,   20, 100]);
 }
 
-function makeCube(type, x, y, z) {
-    var point = [x, y, z];
+function makeCube(type, point) {
     if (world[point] !== undefined) {
         console.log("Tried to create in occupied block");
     }
@@ -144,9 +147,9 @@ function makeCube(type, x, y, z) {
     
     }
     var mesh = new THREE.Mesh(geometry, material);
-    mesh.position.x = x;
-    mesh.position.y = y;
-    mesh.position.z = z;
+    mesh.position.x = point[0];
+    mesh.position.y = point[1];
+    mesh.position.z = point[2];
     
     // for physics
     mesh.blockType = type;
