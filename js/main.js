@@ -221,6 +221,7 @@ function init() {
 
     window.addEventListener( 'resize', onWindowResize, false );
 
+    // some sun/moon to reach for, and mark the axis
     makeCube(blockType.red,   0,   20, 0);
     makeCube(blockType.green, 100, 20, 0);
     makeCube(blockType.blue,  0,   20, 100);
@@ -242,6 +243,11 @@ function makeCube(type, x, y, z) {
     mesh.position.x = x;
     mesh.position.y = y;
     mesh.position.z = z;
+    
+    // for physics
+    mesh.blockType = type;
+    world[[x, y, z]] = mesh;
+    
     scene.add(mesh);
 }
 
