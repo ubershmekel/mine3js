@@ -105,6 +105,10 @@ THREE.PointerLockControls = function ( camera ) {
 
 		switch( event.keyCode ) {
 
+			case 71: // g
+				window.open('https://github.com/ubershmekel/mine3js/');
+				break;
+
 			case 38: // up
 			case 87: // w
 				moveForward = false;
