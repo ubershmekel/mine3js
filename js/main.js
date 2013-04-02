@@ -11,7 +11,7 @@ var fogExp2 = true;
 var container, stats;
 
 var camera, controls, scene, renderer;
-
+var previewCube;
 var mesh;
 var mat = {};
 
@@ -129,6 +129,7 @@ function init() {
     //controls.verticalMin = 1.1;
     //controls.verticalMax = 2.2;
 
+    initPreviewCube();
     generateLandscape();
 
 
@@ -241,6 +242,34 @@ function initMaterials() {
     mat.grass = new THREE.MeshLambertMaterial( { map: textureGrass, ambient: 0xbbbbbb, vertexColors: THREE.VertexColors } );
     mat.dirt = new THREE.MeshLambertMaterial( { map: textureDirt, ambient: 0xbbbbbb, vertexColors: THREE.VertexColors } );
     mat.grassDirt = new THREE.MeshLambertMaterial( { map: textureGrassDirt, ambient: 0xbbbbbb, vertexColors: THREE.VertexColors } );
+    mat.wire = new THREE.MeshBasicMaterial( { color: 0x111166, wireframe: true, transparent: false } );
+}
+
+function initPreviewCube() {
+    var geometry = new THREE.CubeGeometry(1,1,1);
+    var material = mat.wire;
+
+    var mesh = new THREE.Mesh(geometry, material);
+    mesh.position.x = -1;
+    mesh.position.y = -1;
+    mesh.position.z = -1;
+    
+    previewCube = mesh;
+    scene.add(mesh);
+}
+
+function updatePreviewCube() {
+    var targets = getPointyTarget();
+    var first = targets[0];
+    if (first === undefined) {
+        previewCube.visible = false;
+        return;
+    }
+    previewCube.position.x = first[0];
+    previewCube.position.y = first[1];
+    previewCube.position.z = first[2];
+    previewCube.visible = true;
+    //console.log(first);
 }
 
 function generateLandscape() {
@@ -474,7 +503,6 @@ function animate() {
     // minimum of 5 "fps" steps - important for collision detection
     var dt = Math.min(0.2, clock.getDelta());
     render(dt);
-    physics(dt);
 
     stats.update();
 }
@@ -482,6 +510,8 @@ function animate() {
 function render(dt) {
 
     controls.update( dt );
+    physics(dt);
+    updatePreviewCube();
     renderer.render( scene, camera );
 
 }
