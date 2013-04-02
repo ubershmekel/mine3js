@@ -70,13 +70,17 @@ function getPointyTarget() {
 function onLeftClick() {
     // TODO: convert to mousedown and mouseup
     var target = getPointyTarget()[0];
-    makeCube(blockType.dirt, target);
+    if(target !== undefined) {
+        makeCube(blockType.dirt, target);
+    }
 }
 
 function onRightClick() {
     // TODO: convert to mousedown and mouseup
     var target = getPointyTarget()[1];
-    destroyCube(target);
+    if(target !== undefined) {
+        destroyCube(target);
+    }
 }
 
 function init() {
@@ -88,7 +92,7 @@ function init() {
     initMaterials();
     world = {};
 
-    camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.01, 200 );
+    camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.0001, 200 );
     
     
     camera.vx = 0;
