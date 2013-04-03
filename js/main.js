@@ -232,8 +232,8 @@ function initMaterials() {
     textureGrass.minFilter = THREE.LinearMipMapLinearFilter;
 
     var textureDirt = THREE.ImageUtils.loadTexture( 'img/dirt.png' );
-    textureGrass.magFilter = THREE.NearestFilter;
-    textureGrass.minFilter = THREE.LinearMipMapLinearFilter;
+    textureDirt.magFilter = THREE.NearestFilter;
+    textureDirt.minFilter = THREE.LinearMipMapLinearFilter;
 
     var textureGrassDirt = THREE.ImageUtils.loadTexture( 'img/grass_dirt.png' );
     textureGrassDirt.magFilter = THREE.NearestFilter;
