@@ -6,6 +6,10 @@ if ( ! Detector.webgl ) {
 
 }
 
+
+// Global game namespace
+var g = {};
+
 var fogExp2 = true;
 
 var container, stats;
@@ -37,6 +41,8 @@ var blockType = {
 
 var hdata = generateHeight( worldWidth, worldDepth );
 var clock = new THREE.Clock();
+var SECOND_MS = 1000;
+g.lastClick = -1;
 
 var maxPlacementRange = 10;
 var collideVectorStepSize = 0.2;
@@ -68,7 +74,6 @@ function getPointyTarget() {
 }
 
 function onLeftClick() {
-    // TODO: convert to mousedown and mouseup
     var target = getPointyTarget()[0];
     if(target !== undefined) {
         makeCube(blockType.dirt, target);
@@ -76,7 +81,6 @@ function onLeftClick() {
 }
 
 function onRightClick() {
-    // TODO: convert to mousedown and mouseup
     var target = getPointyTarget()[1];
     if(target !== undefined) {
         destroyCube(target);
@@ -493,6 +497,14 @@ function physics(dt) {
     pos.z += ddz;
     if (isCollided()) {
         pos.z -= ddz;
+    }
+    
+    // TODO: refactor this tangle
+    if (controls.mouseDragOn) {
+        if (Date.now() - g.lastClick > 0.3 * SECOND_MS) {
+            controls.doClick();
+            g.lastClick = Date.now();
+        }
     }
 }
 

@@ -191,7 +191,7 @@ THREE.PointerLockControls = function ( camera ) {
             // g force = jump_speed * 0.5 / max_jump_height
             if ( moveUp  && camera.isOnGround) {
                 camera.isOnGround = false;
-                camera.vy = 0.12;
+                camera.vy = 0.13;
             }
         }
         
@@ -220,7 +220,7 @@ THREE.PointerLockControls = function ( camera ) {
                 controls.enabled = true;
 
                 blocker.style.display = 'none';
-
+                
             } else {
 
                 controls.enabled = false;
@@ -293,6 +293,16 @@ THREE.PointerLockControls = function ( camera ) {
     
     };
     
+    // doClick is called by main.js with mouseDragOn.
+    scope.doClick = function() {
+    		if ( scope.enabled === false ) return;
+    		
+        switch ( scope.button ) {
+            case 0: scope.onLeftClick(); break;
+            case 2: scope.onRightClick(); break;
+        }
+    }
+    
     var onMouseDown = function ( event ) {
 
         event.preventDefault();
@@ -305,7 +315,8 @@ THREE.PointerLockControls = function ( camera ) {
 
         }
 
-        this.mouseDragOn = true;
+        scope.button = event.button;
+        scope.mouseDragOn = true;
 
     };    
     var onMouseUp = function ( event ) {
@@ -318,12 +329,12 @@ THREE.PointerLockControls = function ( camera ) {
 
             //case 0: this.moveForward = false; break;
             //case 2: this.moveBackward = false; break;
-            case 0: scope.onLeftClick(); break;
-            case 2: scope.onRightClick(); break;
+            //case 0: scope.onLeftClick(); break;
+            //case 2: scope.onRightClick(); break;
 
         }
 
-        this.mouseDragOn = false;
+        scope.mouseDragOn = false;
 
     };
 };
