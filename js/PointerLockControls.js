@@ -6,16 +6,20 @@ THREE.PointerLockControls = function ( camera ) {
 
 	var scope = this;
 
-    camera.target = new THREE.Vector3( 0, 0, 0 );
-    scope.lookVertical = true;
-    scope.lon = 0;
-    scope.lat = 0;
-    scope.dxSpeed = 0.1;
-    scope.dySpeed = 0.3;
-    scope.verticalMin = 0;
-    scope.verticalMax = Math.PI;
-    
-    scope.movementSpeed = 1.0;
+  camera.target = new THREE.Vector3( 0, 0, 0 );
+  scope.lookVertical = true;
+  scope.lon = 0;
+  scope.lat = 0;
+  scope.dxSpeed = 0.1;
+  scope.dySpeed = 0.3;
+  scope.verticalMin = 0;
+  scope.verticalMax = Math.PI;
+  
+  scope.movementSpeed = 1.0;
+  scope.blocker = document.getElementById( 'blocker' );
+  scope.instructions = document.getElementById( 'instructions' );
+        
+  
     
 	var moveForward = false;
 	var moveBackward = false;
@@ -205,39 +209,43 @@ THREE.PointerLockControls = function ( camera ) {
 		}*/
 
 	};
+	
+	scope.onResume = function() {
+    scope.enabled = true;
+    scope.blocker.style.display = 'none';
+	};
+	
+	scope.onPause = function() {
+    scope.enabled = false;
+
+    scope.blocker.style.display = '-webkit-box';
+    scope.blocker.style.display = '-moz-box';
+    scope.blocker.style.display = 'box';
+
+    scope.instructions.style.display = '';
+	}
+	
+	
 	this.handleResize = function() {};
     
     this.register = function() {
         element = document.body;
-        var blocker = document.getElementById( 'blocker' );
-        var instructions = document.getElementById( 'instructions' );
-        
 
         var pointerlockchange = function ( event ) {
 
             if ( document.pointerLockElement === element || document.mozPointerLockElement === element || document.webkitPointerLockElement === element ) {
 
-                controls.enabled = true;
-
-                blocker.style.display = 'none';
+              scope.onResume();
                 
             } else {
-
-                controls.enabled = false;
-
-                blocker.style.display = '-webkit-box';
-                blocker.style.display = '-moz-box';
-                blocker.style.display = 'box';
-
-                instructions.style.display = '';
-
+              scope.onPause();
             }
 
         }
 
         var pointerlockerror = function ( event ) {
 
-            instructions.style.display = '';
+            scope.instructions.style.display = '';
 
         }
 
@@ -250,9 +258,9 @@ THREE.PointerLockControls = function ( camera ) {
         document.addEventListener( 'mozpointerlockerror', pointerlockerror, false );
         document.addEventListener( 'webkitpointerlockerror', pointerlockerror, false );
 
-        instructions.addEventListener( 'click', function ( event ) {
+        scope.instructions.addEventListener( 'click', function ( event ) {
 
-            instructions.style.display = 'none';
+            scope.instructions.style.display = 'none';
 
             // Ask the browser to lock the pointer
             element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
