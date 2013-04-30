@@ -8,7 +8,7 @@ THREE.PointerLockControls = function ( camera ) {
 
   camera.target = new THREE.Vector3( 0, 0, 0 );
   scope.lookVertical = true;
-  scope.lon = 0;
+  scope.lon = -90; // initial camera direction
   scope.lat = 0;
   scope.dxSpeed = 0.1;
   scope.dySpeed = 0.3;

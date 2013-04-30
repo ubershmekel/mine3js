@@ -1,8 +1,11 @@
 
 function generateHeight( width, height ) {
 
-    var data = [], perlin = new ImprovedNoise(),
-    size = width * height, quality = 2, z = Math.random() * 1;
+    var data = [];
+    var perlin = new ImprovedNoise();
+    var size = width * height;
+    var quality = 2;
+    var z = 0.15; // landscape seed // Math.random() * 1;
 
     for ( var j = 0; j < 4; j ++ ) {
 
