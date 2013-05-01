@@ -9,6 +9,8 @@ if ( ! Detector.webgl ) {
 
 // Global game namespace
 var g = {};
+g.world = {};
+g.cubeLog = {};
 
 var fogExp2 = true;
 
@@ -54,21 +56,21 @@ function getPointyTarget() {
     var dist = 0;
     var vec = camera.position.clone();
     var prevPoint = undefined;
-    
+
     while(dist < maxPlacementRange) {
         dist += collideVectorStepSize;
         vec.add(dir);
         var point = [Math.round(vec.x), Math.round(vec.y), Math.round(vec.z)];
-       
+
         if (g.world[point] !== undefined) {
             return [prevPoint, point];
         }
-        
+
         if (point != prevPoint) {
             prevPoint = point;
         }
     }
-    
+
     return [undefined, undefined];
 }
 
@@ -76,6 +78,7 @@ function onLeftClick() {
     var target = getPointyTarget()[0];
     if(target !== undefined) {
         makeCube(blockType.dirt, target);
+        updateUrl();
     }
 }
 
@@ -83,6 +86,7 @@ function onRightClick() {
     var target = getPointyTarget()[1];
     if(target !== undefined) {
         destroyCube(target);
+        updateUrl();
     }
 }
 
@@ -93,14 +97,12 @@ function init() {
     scene = new THREE.Scene();
     scene.fog = new THREE.FogExp2( skyColor, 0.015 );
     initMaterials();
-    g.world = {};
-
     initPreviewCube();
     generateLandscape();
 
     camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.0001, 200 );
-    
-    
+
+
     camera.vx = 0;
     camera.vy = 0;
     camera.vz = 0;
@@ -127,7 +129,7 @@ function init() {
 
     controls.onLeftClick = onLeftClick;
     controls.onRightClick = onRightClick;
-    
+
     controls.movementSpeed = 8;
     controls.lookSpeed = 0.125;
     controls.lookVertical = true;
@@ -158,6 +160,8 @@ function init() {
 
     window.addEventListener( 'resize', onWindowResize, false );
 
+    g.restoreFromUrl();
+
     // some sun/moon to reach for, and mark the axis
     makeCube(blockType.red,   [0,   20, 0]);
     makeCube(blockType.green, [100, 20, 0]);
@@ -173,18 +177,20 @@ function destroyCube(point) {
         console.log("Destroying grass not yet implemented");
         return;
     }
-    
+
     var obj = g.world[point];
     scene.remove(obj);
     //obj.dispose();
-    //obj.deallocate(); 
+    //obj.deallocate();
     //obj.geometry.deallocate();
     //obj.material.deallocate();
     //obj.material.map.deallocate();
     //renderer.deallocateObject( obj );
     //renderer.deallocateTexture( texture );
-    //renderer.deallocateMaterial( material );  
+    //renderer.deallocateMaterial( material );
+
     delete g.world[point];
+    delete g.cubeLog[point];
 }
 
 function makeCube(type, point) {
@@ -198,13 +204,13 @@ function makeCube(type, point) {
         delete g.world[point];
         return;
     }
-    
+
     var geometry = new THREE.CubeGeometry(1,1,1);
     var color = 0x000000;
     if (typeof type == "number") {
         color = type;
     }
-    
+
     var material;
     if (type == blockType.dirt) {
         material = mat.dirt;
@@ -214,18 +220,52 @@ function makeCube(type, point) {
         overdraw : true,
         fog: false,
         shading : THREE.FlatShading});
-    
+
     }
     var mesh = new THREE.Mesh(geometry, material);
     mesh.position.x = point[0];
     mesh.position.y = point[1];
     mesh.position.z = point[2];
-    
+
     // for physics
     mesh.blockType = type;
     g.world[point] = mesh;
-    
+
+    g.cubeLog[point] = type;
+
     scene.add(mesh);
+}
+
+function updateUrl() {
+    var urlCubes = "#";
+    for (var point in g.cubeLog) {
+        var type = g.cubeLog[point];
+        if (type != blockType.dirt) {
+            continue
+        }
+        urlCubes += point + ",";
+        //for (var prop in obj) {
+        //  alert(prop + " = " + obj[prop]);
+        //}
+    }
+
+    console.log(urlCubes);
+    history.replaceState({}, "title", urlCubes);
+}
+
+g.restoreFromUrl = function() {
+    var url = window.location.href;
+    var coords = url.match(/-?\d+,/g);
+    if (coords == null) {
+        return;
+    }
+    for (var i = 0; i < coords.length; i++) {
+        coords[i] = coords[i].slice(0, -1);
+    }
+
+    for (var i = 0; i < coords.length; i += 3) {
+        makeCube(blockType.dirt, [coords[i], coords[i + 1], coords[i + 2]]);
+    }
 }
 
 function initMaterials() {
@@ -255,7 +295,7 @@ function initPreviewCube() {
     mesh.position.x = -1;
     mesh.position.y = -1;
     mesh.position.z = -1;
-    
+
     previewCube = mesh;
     scene.add(mesh);
 }
@@ -300,27 +340,30 @@ function loadTexture( path, callback ) {
 
 function isCollided() {
     var pos = camera.position;
-    
+
     // You're standing above the cube that's Math.floor and you're
     // close to the cube that's Math.round near you.
     var ix = Math.round(pos.x);
     var iz = Math.round(pos.z);
-    
+
     var iy = Math.floor(pos.y);
-    
+
     if(g.world[[ix, iy, iz]] !== undefined) {
         return true;
     }
-    
+
     if(g.world[[ix, iy - 1, iz]] !== undefined) {
         return true;
     }
-    
+
     return false;
 }
 
 
 function physics(dt) {
+    if (!controls.enabled) {
+        return;
+    }
     var pos = camera.position;
     camera.vy = camera.vy - gravity * dt
     camera.vy = Math.max(camera.vy, -5); // terminal velocity
@@ -331,7 +374,7 @@ function physics(dt) {
         camera.vy = 0; // to avoid exploding gravity
         camera.isOnGround = true;
     }
-    
+
     var lookingAt = camera.direction();
     var ddx = -lookingAt.z * camera.vx - lookingAt.x * camera.vz;
     var ddz = lookingAt.x * camera.vx - lookingAt.z * camera.vz;
@@ -343,7 +386,7 @@ function physics(dt) {
     if (isCollided()) {
         pos.z -= ddz;
     }
-    
+
     // TODO: refactor this tangle
     if (controls.mouseDragOn) {
         if (Date.now() - g.lastClick > 0.3 * SECOND_MS) {
