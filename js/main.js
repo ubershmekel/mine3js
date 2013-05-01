@@ -248,9 +248,9 @@ function updateUrl() {
         //}
     }
 
-    //console.log(urlCubes.length + " - " + g.lzw_encode(urlCubes).length);
+    //console.log(urlCubes.length + " - " + LZW.compress(urlCubes).length);
     if (g.lzw) {
-        urlCubes = g.lzw_encode(urlCubes)
+        urlCubes = LZW.compress(urlCubes)
     }
 
     history.replaceState({}, "title", "#" + urlCubes);
@@ -265,7 +265,7 @@ g.restoreFromUrl = function() {
             return;
         }
         var data = url.slice(hashLoc + 1);
-        url = g.lzw_decode(data);
+        url = LZW.decompress(data);
     }
     
     var coords = url.match(/-?\d+,/g);

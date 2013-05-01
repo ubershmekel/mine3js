@@ -1,10 +1,11 @@
 // LZW-compress a string
-g.lzw_encode = function(s) {
+LZW = {}
+LZW.compress = function(s) {
     var dict = {};
     var data = (s + "").split("");
     var out = [];
     var currChar;
-    var phrase = data[0];
+    var phrase = data[0] || "";
     var code = 256;
     for (var i=1; i<data.length; i++) {
         currChar=data[i];
@@ -26,7 +27,7 @@ g.lzw_encode = function(s) {
 }
 
 // Decompress an LZW-encoded string
-g.lzw_decode = function(s) {
+LZW.decompress = function(s) {
     var dict = {};
     var data = (s + "").split("");
     var currChar = data[0];
