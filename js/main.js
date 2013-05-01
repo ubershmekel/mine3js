@@ -7,8 +7,7 @@ if ( ! Detector.webgl ) {
 }
 
 
-// Global game namespace
-var g = {};
+g.lzw = true;
 g.world = {};
 g.cubeLog = {};
 
@@ -237,7 +236,7 @@ function makeCube(type, point) {
 }
 
 function updateUrl() {
-    var urlCubes = "#";
+    var urlCubes = "";
     for (var point in g.cubeLog) {
         var type = g.cubeLog[point];
         if (type != blockType.dirt) {
@@ -249,12 +248,26 @@ function updateUrl() {
         //}
     }
 
-    console.log(urlCubes);
-    history.replaceState({}, "title", urlCubes);
+    //console.log(urlCubes.length + " - " + g.lzw_encode(urlCubes).length);
+    if (g.lzw) {
+        urlCubes = g.lzw_encode(urlCubes)
+    }
+
+    history.replaceState({}, "title", "#" + urlCubes);
 }
 
 g.restoreFromUrl = function() {
-    var url = window.location.href;
+    var url = window.location.href + "";
+    
+    if (g.lzw) {
+        var hashLoc = url.indexOf('#');
+        if(hashLoc == -1) {
+            return;
+        }
+        var data = url.slice(hashLoc + 1);
+        url = g.lzw_decode(data);
+    }
+    
     var coords = url.match(/-?\d+,/g);
     if (coords == null) {
         return;
