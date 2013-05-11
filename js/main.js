@@ -76,16 +76,20 @@ function getPointyTarget() {
 function onLeftClick() {
     var target = getPointyTarget()[0];
     if(target !== undefined) {
-        makeCube(blockType.dirt, target);
-        updateUrl();
+        if(makeCube(blockType.dirt, target)) {
+            g.cubeLog[target] = target;
+            g.updateUrl();
+        }
     }
 }
 
 function onRightClick() {
     var target = getPointyTarget()[1];
     if(target !== undefined) {
-        destroyCube(target);
-        updateUrl();
+        if(destroyCube(target)) {
+            delete g.cubeLog[target];
+            g.updateUrl();
+        }
     }
 }
 
@@ -170,11 +174,11 @@ function init() {
 function destroyCube(point) {
     if (g.world[point] === undefined) {
         console.log("Tried to destroy in empty block");
-        return;
+        return false;
     }
     if (g.world[point].blockType == blockType.grass) {
         console.log("Destroying grass not yet implemented");
-        return;
+        return false;
     }
 
     var obj = g.world[point];
@@ -189,19 +193,20 @@ function destroyCube(point) {
     //renderer.deallocateMaterial( material );
 
     delete g.world[point];
-    delete g.cubeLog[point];
+    
+    return true;
 }
 
 function makeCube(type, point) {
     if (g.world[point] !== undefined) {
         console.log("Tried to create in occupied block");
-        return;
+        return false;
     }
     g.world[point] = NaN; // temp val for collision test
     if(isCollided()) {
         console.log("Tried to create block inside body");
         delete g.world[point];
-        return;
+        return false;
     }
 
     var geometry = new THREE.CubeGeometry(1,1,1);
@@ -230,28 +235,34 @@ function makeCube(type, point) {
     mesh.blockType = type;
     g.world[point] = mesh;
 
-    g.cubeLog[point] = type;
-
     scene.add(mesh);
+    return true;
 }
 
-function updateUrl() {
+g.numToCode = function(number) {
+    var text = Base64.fromNumber(number);
+    if (text.length < 2) {
+        return "0" + text;
+    } else {
+        return text;
+    }
+}
+
+g.updateUrl = function() {
     var urlCubes = "";
     for (var point in g.cubeLog) {
-        var type = g.cubeLog[point];
-        if (type != blockType.dirt) {
-            continue
-        }
-        urlCubes += point + ",";
-        //for (var prop in obj) {
-        //  alert(prop + " = " + obj[prop]);
-        //}
+        var point = g.cubeLog[point];
+        //urlCubes += point + ",";
+        //console.log(point)
+        // +100 to avoid negative numbers in the Y axis
+        urlCubes += g.numToCode(point[0]) + g.numToCode(point[1] + 100) + g.numToCode(point[2])
     }
 
-    //console.log(urlCubes.length + " - " + LZW.compress(urlCubes).length);
+    /*console.log(urlCubes.length + " - " + Base64.encode(LZW.compress(urlCubes)).length);
     if (g.lzw) {
-        urlCubes = LZW.compress(urlCubes)
-    }
+        urlCubes = Base64.encode(LZW.compress(urlCubes));
+    }*/
+    //urlCubes
 
     history.replaceState({}, "title", "#" + urlCubes);
 }
@@ -259,25 +270,23 @@ function updateUrl() {
 g.restoreFromUrl = function() {
     var url = window.location.href + "";
     
-    if (g.lzw) {
-        var hashLoc = url.indexOf('#');
-        if(hashLoc == -1) {
-            return;
-        }
-        var data = url.slice(hashLoc + 1);
-        url = LZW.decompress(data);
-    }
-    
-    var coords = url.match(/-?\d+,/g);
-    if (coords == null) {
+    var hashLoc = url.indexOf('#');
+    if(hashLoc == -1) {
         return;
     }
-    for (var i = 0; i < coords.length; i++) {
-        coords[i] = coords[i].slice(0, -1);
+    var data = url.slice(hashLoc + 1);
+    //console.log('data ' + data.length);
+    
+    var coords = [];
+    for (var i = 0; i < data.length; i += 2) {
+        coords.push(Base64.toNumber(data.slice(i, i + 2)));
     }
 
+    console.log(coords);
     for (var i = 0; i < coords.length; i += 3) {
-        makeCube(blockType.dirt, [coords[i], coords[i + 1], coords[i + 2]]);
+        var target = [coords[i], coords[i + 1] - 100, coords[i + 2]];
+        g.cubeLog[target] = target;
+        makeCube(blockType.dirt, target);
     }
 }
 
@@ -403,8 +412,8 @@ function physics(dt) {
     // TODO: refactor this tangle
     if (controls.mouseDragOn) {
         if (Date.now() - g.lastClick > 0.3 * SECOND_MS) {
-            controls.doClick();
             g.lastClick = Date.now();
+            controls.doClick();
         }
     }
 }
