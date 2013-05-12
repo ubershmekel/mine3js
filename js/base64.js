@@ -48,6 +48,10 @@ var Base64 = {
     },
 
     toPoint : function(quad) {
+        /*
+            4 base64 letters = 24 bits (3 unsigned bytes)
+            "0000" -> [0,0,0]
+        */
         var num = this.toNumber(quad);
         var x = num & 0xff;
         var y = (num >> 8) & 0xff;
@@ -56,6 +60,11 @@ var Base64 = {
     },
     
     fromPoint : function(point) {
+        /*
+            4 base64 letters = 24 bits (3 unsigned bytes)
+            [0,0,0] -> "0000"
+            Requires that x,y,z > 0,0,0
+        */
         var num = 0;
         var quadLength = 4;
         num += point[0];

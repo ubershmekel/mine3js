@@ -123,7 +123,7 @@ function init() {
         controls.register();
         //scene.add( controls.getObject() );
     } else {
-        controls = new THREE.FirstPersonControls( camera );
+        alert("Mine3js requires pointer lock and your browser doesn't seem to have it :/");
     }
 
     camera.position.y = landscapeY( worldHalfWidth, worldHalfDepth ) + 2;
@@ -247,35 +247,49 @@ g.numToCode = function(number) {
         return text;
     }
 }
+/*
+Tested with the standard random data
 
+Math.min.apply(null, xs)
+0
+Math.min.apply(null, zs)
+0
+Math.max.apply(null, xs)
+199
+Math.max.apply(null, zs)
+199
+
+Math.min.apply(null, ys)
+-13
+Math.max.apply(null, ys)
+20
+*/
+g.worldFloor = -13;
+g.urlMarker = "#a=";
 g.updateUrl = function() {
     var urlCubes = "";
-    for (var point in g.cubeLog) {
-        var point = g.cubeLog[point];
+    for (var pointText in g.cubeLog) {
+        var point = g.cubeLog[pointText];
         //urlCubes += point + ",";
         //console.log(point)
-        // +100 to avoid negative numbers in the Y axis
-        urlCubes += Base64.fromPoint([point[0], point[1] + 100, point[2]])
+        // +13 to avoid negative numbers in the Y axis
+        urlCubes += Base64.fromPoint([point[0], point[1] - g.worldFloor, point[2]])
     }
 
-    /*console.log(urlCubes.length + " - " + Base64.encode(LZW.compress(urlCubes)).length);
-    if (g.lzw) {
-        urlCubes = Base64.encode(LZW.compress(urlCubes));
-    }*/
-    //urlCubes
-
-    history.replaceState({}, "title", "#" + urlCubes);
+    // "a=" is to allow future enhancements
+    history.replaceState({}, "title", g.urlMarker + urlCubes);
 }
 
 g.restoreFromUrl = function() {
     var url = window.location.href + "";
     
-    var hashLoc = url.indexOf('#');
+    var hashLoc = url.indexOf(g.urlMarker);
     if(hashLoc == -1) {
         return;
     }
-    var data = url.slice(hashLoc + 1);
-    //console.log('data ' + data.length);
+    var data = url.slice(hashLoc + g.urlMarker.length);
+    console.log('url data ' + data.length);
+    console.log('data:' + data);
     
     var coords = [];
     for (var i = 0; i < data.length; i += 4) {
@@ -284,9 +298,9 @@ g.restoreFromUrl = function() {
 
     //console.log(coords);
     for (var i = 0; i < coords.length; i ++) {
-        // -100 because +100 to avoid negative numbers in the Y axis
+        // +13 was to avoid negative numbers in the Y axis
         var t = coords[i];
-        var target = [t[0], t[1] - 100, t[2]];
+        var target = [t[0], t[1] + g.worldFloor, t[2]];
         g.cubeLog[target] = target;
         makeCube(blockType.dirt, target);
     }
