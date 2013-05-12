@@ -47,6 +47,27 @@ var Base64 = {
         return result;
     },
 
+    toPoint : function(quad) {
+        var num = this.toNumber(quad);
+        var x = num & 0xff;
+        var y = (num >> 8) & 0xff;
+        var z = num >> 16;
+        return [x, y, z];
+    },
+    
+    fromPoint : function(point) {
+        var num = 0;
+        var quadLength = 4;
+        num += point[0];
+        num += point[1] << 8;
+        num += point[2] << 16;
+        var text = this.fromNumber(num);
+        for (var i = text.length; i < quadLength; i++) {
+            text = '0' + text;
+        }
+        return text;
+    },
+    
     toNumber : function(rixits) {
         var result = 0;
         // console.log("rixits : " + rixits);

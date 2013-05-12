@@ -255,7 +255,7 @@ g.updateUrl = function() {
         //urlCubes += point + ",";
         //console.log(point)
         // +100 to avoid negative numbers in the Y axis
-        urlCubes += g.numToCode(point[0]) + g.numToCode(point[1] + 100) + g.numToCode(point[2])
+        urlCubes += Base64.fromPoint([point[0], point[1] + 100, point[2]])
     }
 
     /*console.log(urlCubes.length + " - " + Base64.encode(LZW.compress(urlCubes)).length);
@@ -278,13 +278,15 @@ g.restoreFromUrl = function() {
     //console.log('data ' + data.length);
     
     var coords = [];
-    for (var i = 0; i < data.length; i += 2) {
-        coords.push(Base64.toNumber(data.slice(i, i + 2)));
+    for (var i = 0; i < data.length; i += 4) {
+        coords.push(Base64.toPoint(data.slice(i, i + 4)));
     }
 
-    console.log(coords);
-    for (var i = 0; i < coords.length; i += 3) {
-        var target = [coords[i], coords[i + 1] - 100, coords[i + 2]];
+    //console.log(coords);
+    for (var i = 0; i < coords.length; i ++) {
+        // -100 because +100 to avoid negative numbers in the Y axis
+        var t = coords[i];
+        var target = [t[0], t[1] - 100, t[2]];
         g.cubeLog[target] = target;
         makeCube(blockType.dirt, target);
     }
