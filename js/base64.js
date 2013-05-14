@@ -71,7 +71,9 @@ var Base64 = {
         num += point[1] << 8;
         num += point[2] << 16;
         var text = this.fromNumber(num);
-        for (var i = text.length; i < quadLength; i++) {
+        
+        // zero padding required for avoiding separators (commas)
+        while (text.length < quadLength) {
             text = '0' + text;
         }
         return text;

@@ -34,6 +34,7 @@ var Detector = {
 				'Find out how to get it <a href="http://get.webgl.org/" style="color:#000">here</a>.'
 			].join( '\n' );
 
+      alert("Mine3js requires webgl, sorry :(");
 		}
 
 		return element;
