@@ -1,4 +1,5 @@
 
+
 if ( ! Detector.webgl ) {
 
     Detector.addGetWebGLMessage();
@@ -7,7 +8,6 @@ if ( ! Detector.webgl ) {
 }
 
 
-g.lzw = true;
 g.world = {};
 g.cubeLog = {};
 
@@ -22,8 +22,8 @@ var mat = {};
 
 //
 // g force = jump_speed * 0.5 / max_jump_height
-var gravity = 0.3;
-var skyColor = 0xddddff;
+g.gravity = 0.3;
+g.skyColor = 0xddddff;
 
 // in blocks
 var worldWidth = 200, worldDepth = 200;
@@ -98,7 +98,7 @@ function init() {
     container = document.getElementById( 'container' );
 
     scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2( skyColor, 0.015 );
+    scene.fog = new THREE.FogExp2( g.skyColor, 0.015 );
     initMaterials();
     initPreviewCube();
     generateLandscape();
@@ -147,7 +147,7 @@ function init() {
     directionalLight.position.set( 1, 1, 0.5 ).normalize();
     scene.add( directionalLight );
 
-    renderer = new THREE.WebGLRenderer( { clearColor: skyColor, clearAlpha: 1 } );
+    renderer = new THREE.WebGLRenderer( { clearColor: g.skyColor, clearAlpha: 1 } );
     renderer.setSize( window.innerWidth, window.innerHeight );
 
     container.innerHTML = "";
@@ -403,7 +403,7 @@ function physics(dt) {
         return;
     }
     var pos = camera.position;
-    camera.vy = camera.vy - gravity * dt
+    camera.vy = camera.vy - g.gravity * dt
     camera.vy = Math.max(camera.vy, -5); // terminal velocity
 
     pos.y += camera.vy;
