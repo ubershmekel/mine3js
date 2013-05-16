@@ -4,51 +4,51 @@
 
 THREE.PointerLockControls = function ( camera ) {
 
-	var scope = this;
+    var scope = this;
 
-  camera.target = new THREE.Vector3( 0, 0, 0 );
-  scope.lookVertical = true;
-  scope.lon = -90; // initial camera direction
-  scope.lat = 0;
-  scope.dxSpeed = 0.1;
-  scope.dySpeed = 0.3;
-  scope.verticalMin = 0;
-  scope.verticalMax = Math.PI;
-  
-  scope.movementSpeed = 1.0;
-  scope.blocker = document.getElementById( 'blocker' );
-  scope.instructions = document.getElementById( 'instructions' );
+    camera.target = new THREE.Vector3( 0, 0, 0 );
+    scope.lookVertical = true;
+    scope.lon = -90; // initial camera direction
+    scope.lat = 0;
+    scope.dxSpeed = 0.1;
+    scope.dySpeed = 0.3;
+    scope.verticalMin = 0;
+    scope.verticalMax = Math.PI;
+
+    scope.movementSpeed = 1.0;
+    scope.blocker = document.getElementById( 'blocker' );
+    scope.instructions = document.getElementById( 'instructions' );
         
   
     
-	var moveForward = false;
-	var moveBackward = false;
-	var moveLeft = false;
-	var moveRight = false;
-	var moveUp = false;
-	var moveDown = false;
+    var moveForward = false;
+    var moveBackward = false;
+    var moveLeft = false;
+    var moveRight = false;
+    var moveUp = false;
+    var moveDown = false;
 
-	var isOnObject = false;
-	var canJump = false;
+    var isOnObject = false;
+    var canJump = false;
 
-	var velocity = new THREE.Vector3();
+    var velocity = new THREE.Vector3();
 
-	var PI_2 = Math.PI / 2;
+    var PI_2 = Math.PI / 2;
 
-	var onMouseMove = function ( event ) {
+    var onMouseMove = function ( event ) {
 
-		if ( scope.enabled === false ) return;
+        if ( scope.enabled === false ) return;
 
-		var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
-		var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
+        var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
+        var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
 
-		//yawObject.rotation.y -= movementX * 0.002;
-		//pitchObject.rotation.x -= movementY * 0.002;
+        //yawObject.rotation.y -= movementX * 0.002;
+        //pitchObject.rotation.x -= movementY * 0.002;
         mouseDelta(movementX, movementY);
 
-		//pitchObject.rotation.x = Math.max( - PI_2, Math.min( PI_2, pitchObject.rotation.x ) );
+        //pitchObject.rotation.x = Math.max( - PI_2, Math.min( PI_2, pitchObject.rotation.x ) );
 
-	};
+    };
     
     var mouseDelta = function(dx, dy) {
         scope.lon += dx * scope.dxSpeed;
@@ -74,119 +74,119 @@ THREE.PointerLockControls = function ( camera ) {
         camera.lookAt( camera.target );    
     }
 
-	var onKeyDown = function ( event ) {
+    var onKeyDown = function ( event ) {
 
-		switch ( event.keyCode ) {
+        switch ( event.keyCode ) {
 
-			case 38: // up
-			case 87: // w
-				moveForward = true;
-				break;
+            case 38: // up
+            case 87: // w
+                moveForward = true;
+                break;
 
-			case 37: // left
-			case 65: // a
-				moveLeft = true; break;
+            case 37: // left
+            case 65: // a
+                moveLeft = true; break;
 
-			case 40: // down
-			case 83: // s
-				moveBackward = true;
-				break;
+            case 40: // down
+            case 83: // s
+                moveBackward = true;
+                break;
 
-			case 39: // right
-			case 68: // d
-				moveRight = true;
-				break;
+            case 39: // right
+            case 68: // d
+                moveRight = true;
+                break;
 
             case 32: /*space*/
             case 82: /*R*/ moveUp = true; break;
             case 70: /*F*/ moveDown = true; break;
 
-		}
+        }
 
-	};
+    };
 
-	var onKeyUp = function ( event ) {
+    var onKeyUp = function ( event ) {
 
-		switch( event.keyCode ) {
+        switch( event.keyCode ) {
 
-			case 71: // g
-				window.open('https://github.com/ubershmekel/mine3js/');
-				break;
+            case 71: // g
+                window.open('https://github.com/ubershmekel/mine3js/');
+                break;
 
-			case 38: // up
-			case 87: // w
-				moveForward = false;
-				break;
+            case 38: // up
+            case 87: // w
+                moveForward = false;
+                break;
 
-			case 37: // left
-			case 65: // a
-				moveLeft = false;
-				break;
+            case 37: // left
+            case 65: // a
+                moveLeft = false;
+                break;
 
-			case 40: // down
-			case 83: // a
-				moveBackward = false;
-				break;
+            case 40: // down
+            case 83: // a
+                moveBackward = false;
+                break;
 
-			case 39: // right
-			case 68: // d
-				moveRight = false;
-				break;
+            case 39: // right
+            case 68: // d
+                moveRight = false;
+                break;
 
             case 32: /*space*/
             case 82: /*R*/ moveUp = false; break;
             case 70: /*F*/ moveDown = false; break;
-		}
+        }
 
-	};
+    };
 
-	document.addEventListener( 'mousemove', onMouseMove, false );
-	document.addEventListener( 'keydown', onKeyDown, false );
-	document.addEventListener( 'keyup', onKeyUp, false );
+    document.addEventListener( 'mousemove', onMouseMove, false );
+    document.addEventListener( 'keydown', onKeyDown, false );
+    document.addEventListener( 'keyup', onKeyUp, false );
 
-	this.enabled = false;
+    this.enabled = false;
 
-	/*this.getObject = function () {
+    /*this.getObject = function () {
 
-		return yawObject;
+        return yawObject;
 
-	};*/
+    };*/
 
-	this.isOnObject = function ( boolean ) {
+    this.isOnObject = function ( boolean ) {
 
-		isOnObject = boolean;
-		canJump = boolean;
+        isOnObject = boolean;
+        canJump = boolean;
 
-	};
+    };
 
-	this.update = function ( delta ) {
+    this.update = function ( delta ) {
 
-		if ( scope.enabled === false ) return;
+        if ( scope.enabled === false ) return;
 
-		/*velocity.x += ( - velocity.x ) * 0.08 * delta;
-		velocity.z += ( - velocity.z ) * 0.08 * delta;
+        /*velocity.x += ( - velocity.x ) * 0.08 * delta;
+        velocity.z += ( - velocity.z ) * 0.08 * delta;
 
-		velocity.y -= 0.25 * delta;*/
+        velocity.y -= 0.25 * delta;*/
 
         velocity.x = 0;
         velocity.y = 0;
         velocity.z = 0;
         
-		if ( moveForward ) velocity.z -= scope.movementSpeed * delta;
-		if ( moveBackward ) velocity.z += scope.movementSpeed * delta;
+        if ( moveForward ) velocity.z -= scope.movementSpeed * delta;
+        if ( moveBackward ) velocity.z += scope.movementSpeed * delta;
 
-		if ( moveLeft ) velocity.x -= scope.movementSpeed * delta;
-		if ( moveRight ) velocity.x += scope.movementSpeed * delta;
+        if ( moveLeft ) velocity.x -= scope.movementSpeed * delta;
+        if ( moveRight ) velocity.x += scope.movementSpeed * delta;
 
-		if ( isOnObject === true ) {
+        if ( isOnObject === true ) {
 
-			velocity.y = Math.max( 0, velocity.y );
+            velocity.y = Math.max( 0, velocity.y );
 
-		}
+        }
 
-		camera.vx = velocity.x;
-		//camera.vy = velocity.y; 
-		camera.vz = velocity.z ;
+        camera.vx = velocity.x;
+        //camera.vy = velocity.y; 
+        camera.vz = velocity.z ;
 
         if ( this.fly ) {
             if ( moveUp ) camera.translateY( actualMoveSpeed );
@@ -199,23 +199,23 @@ THREE.PointerLockControls = function ( camera ) {
             }
         }
         
-		/*if ( yawObject.position.y < 10 ) {
+        /*if ( yawObject.position.y < 10 ) {
 
-			velocity.y = 0;
-			yawObject.position.y = 10;
+            velocity.y = 0;
+            yawObject.position.y = 10;
 
-			canJump = true;
+            canJump = true;
 
-		}*/
+        }*/
 
-	};
-	
-	scope.onResume = function() {
+    };
+    
+    scope.onResume = function() {
     scope.enabled = true;
     scope.blocker.style.display = 'none';
-	};
-	
-	scope.onPause = function() {
+    };
+    
+    scope.onPause = function() {
     scope.enabled = false;
 
     scope.blocker.style.display = '-webkit-box';
@@ -223,10 +223,10 @@ THREE.PointerLockControls = function ( camera ) {
     scope.blocker.style.display = 'box';
 
     scope.instructions.style.display = '';
-	}
-	
-	
-	this.handleResize = function() {};
+    }
+    
+    
+    this.handleResize = function() {};
     
     this.register = function() {
         element = document.body;
@@ -303,8 +303,8 @@ THREE.PointerLockControls = function ( camera ) {
     
     // doClick is called by main.js with mouseDragOn.
     scope.doClick = function() {
-    		if ( scope.enabled === false ) return;
-    		
+            if ( scope.enabled === false ) return;
+            
         switch ( scope.button ) {
             case 0: scope.onLeftClick(); break;
             case 2: scope.onRightClick(); break;
