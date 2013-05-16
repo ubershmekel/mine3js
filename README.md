@@ -30,4 +30,4 @@ with the [painterly pack](http://painterlypack.net) textures.
 
 Url's encoded with [JS Base64](http://stackoverflow.com/questions/6213227/fastest-way-to-convert-a-number-to-radix-64-in-javascript).
 
-
+Cube icon favicon - Keyamoon - http://keyamoon.com/
