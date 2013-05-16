@@ -20,9 +20,10 @@ var previewCube;
 var mesh;
 var mat = {};
 
-//
-// g force = jump_speed * 0.5 / max_jump_height
-g.gravity = 0.3;
+// This equation should be correct, but I don't know why it isn't.
+// g force = -jump_speed * 0.5 / max_jump_height
+g.gravity = -0.3;
+g.jumpVY = 0.13;
 g.skyColor = 0xddddff;
 
 // in blocks
@@ -399,11 +400,14 @@ function isCollided() {
 
 
 function physics(dt) {
+    /*
+     dt - delta time from last frame in seconds.
+    */
     if (!controls.enabled) {
         return;
     }
     var pos = camera.position;
-    camera.vy = camera.vy - g.gravity * dt
+    camera.vy = camera.vy + g.gravity * dt
     camera.vy = Math.max(camera.vy, -5); // terminal velocity
 
     pos.y += camera.vy;

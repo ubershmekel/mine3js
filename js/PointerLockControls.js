@@ -189,13 +189,13 @@ THREE.PointerLockControls = function ( camera ) {
         camera.vz = velocity.z ;
 
         if ( this.fly ) {
-            if ( moveUp ) camera.translateY( actualMoveSpeed );
-            if ( moveDown ) camera.translateY( - actualMoveSpeed );
+            if ( moveUp ) camera.translateY( g.jumpVY );
+            if ( moveDown ) camera.translateY( - g.jumpVY );
         } else {
             // g force = jump_speed * 0.5 / max_jump_height
             if ( moveUp  && camera.isOnGround) {
                 camera.isOnGround = false;
-                camera.vy = 0.13;
+                camera.vy = g.jumpVY;
             }
         }
         
