@@ -26,6 +26,10 @@ g.gravity = -0.3;
 g.jumpVY = 0.13;
 g.skyColor = 0xddddff;
 
+g.cameraFOV = 75;
+g.cameraNear = 0.001;
+g.cameraFar = 200;
+
 // in blocks
 var worldWidth = 200, worldDepth = 200;
 var worldHalfWidth = worldWidth / 2;
@@ -104,7 +108,8 @@ function init() {
     initPreviewCube();
     generateLandscape();
 
-    camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.0001, 200 );
+    var aspect = window.innerWidth / window.innerHeight;
+    camera = new THREE.PerspectiveCamera( g.cameraFOV, aspect, g.cameraNear, g.cameraFar );
 
 
     camera.vx = 0;
@@ -321,7 +326,7 @@ function initMaterials() {
     textureGrassDirt.minFilter = THREE.LinearMipMapLinearFilter;
 
     mat.grass = new THREE.MeshLambertMaterial( { map: textureGrass, ambient: 0xbbbbbb, vertexColors: THREE.VertexColors } );
-    mat.dirt = new THREE.MeshLambertMaterial( { map: textureDirt, ambient: 0xbbbbbb, vertexColors: THREE.VertexColors } );
+    mat.dirt = new THREE.MeshLambertMaterial( { map: textureDirt, ambient: 0xbbbbbb, vertexColors: THREE.VertexColors, shading: THREE.FlatShading } );
     mat.grassDirt = new THREE.MeshLambertMaterial( { map: textureGrassDirt, ambient: 0xbbbbbb, vertexColors: THREE.VertexColors } );
     mat.wire = new THREE.MeshBasicMaterial( { color: 0x111166, wireframe: true, transparent: false } );
 }
